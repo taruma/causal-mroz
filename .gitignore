@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 playground.ipynb
 playground2.ipynb
+uv.lock
