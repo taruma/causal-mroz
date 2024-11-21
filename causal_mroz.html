@@ -3298,12 +3298,14 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#implementasi-distance-matching" id="toc-implementasi-distance-matching" class="nav-link" data-scroll-target="#implementasi-distance-matching"><span class="header-section-number">6.2.1</span> Implementasi <em>Distance Matching</em></a></li>
   </ul></li>
-  <li><a href="#propensity-score-matching" id="toc-propensity-score-matching" class="nav-link" data-scroll-target="#propensity-score-matching"><span class="header-section-number">6.3</span> <em>Propensity Score Matching</em></a></li>
+  <li><a href="#propensity-score-matching" id="toc-propensity-score-matching" class="nav-link" data-scroll-target="#propensity-score-matching"><span class="header-section-number">6.3</span> <em>Propensity Score Matching</em></a>
+  <ul class="collapse">
+  <li><a href="#estimated-parameters-of-propensity-score" id="toc-estimated-parameters-of-propensity-score" class="nav-link" data-scroll-target="#estimated-parameters-of-propensity-score"><span class="header-section-number">6.3.1</span> <em>Estimated Parameters of Propensity Score</em></a></li>
+  <li><a href="#trimming" id="toc-trimming" class="nav-link" data-scroll-target="#trimming"><span class="header-section-number">6.3.2</span> <em>Trimming</em></a></li>
+  <li><a href="#estimasi-propensity-score-matching" id="toc-estimasi-propensity-score-matching" class="nav-link" data-scroll-target="#estimasi-propensity-score-matching"><span class="header-section-number">6.3.3</span> Estimasi <em>Propensity Score Matching</em></a></li>
   </ul></li>
-  <li><a href="#kesimpulan" id="toc-kesimpulan" class="nav-link" data-scroll-target="#kesimpulan"><span class="header-section-number">7</span> Kesimpulan</a>
-  <ul>
-  <li><a href="#limitasi-dan-saran" id="toc-limitasi-dan-saran" class="nav-link" data-scroll-target="#limitasi-dan-saran"><span class="header-section-number">7.1</span> Limitasi dan Saran</a></li>
   </ul></li>
+  <li><a href="#kesimpulan" id="toc-kesimpulan" class="nav-link" data-scroll-target="#kesimpulan"><span class="header-section-number">7</span> Kesimpulan</a></li>
   </ul>
 <div class="quarto-code-links"><h2>Tautan Kode</h2><ul><li><a href="https://github.com/taruma/causal-mroz"><i class="bi bi-github"></i>Repository</a></li></ul></div></nav>
 </div>
@@ -3340,7 +3342,7 @@ window.Quarto = {
 <div>
   <div class="abstract">
     <div class="block-title">Abstrak</div>
-    <p>The characteristic theme of the works of Stone is the bridge between culture and society. …</p>
+    <p>Studi ini menganalisis hubungan kausal antara pendidikan tinggi wanita dan partisipasi mereka dalam tenaga kerja menggunakan data Mroz dari Panel Study of Income Dynamics (PSID) tahun 1975. Dengan menggunakan data observasional dari 753 wanita menikah berusia 30-60 tahun, analisis ini menerapkan metode matching untuk mengestimasi efek kausal dari pendidikan tinggi terhadap probabilitas partisipasi dalam tenaga kerja, sambil mengontrol berbagai faktor confounding seperti usia, pendidikan suami, jumlah anak, dan pendapatan keluarga. Hasil analisis menggunakan berbagai metode matching menunjukkan efek kausal yang positif dan signifikan. <em>Distance matching</em> dengan <em>one-to-one specification</em> menghasilkan <em>Average Treatment Effect</em> (ATE) sebesar 25 <em>percentage points</em> (p = 0.001), sementara <em>propensity score matching</em> setelah <em>trimming</em> mengestimasi efek sebesar 28.2 <em>percentage points</em> (p &lt; 0.001). Konsistensi hasil dari berbagai spesifikasi matching memberikan bukti kuat bahwa pendidikan tinggi secara substansial meningkatkan probabilitas partisipasi wanita dalam tenaga kerja.</p>
   </div>
 </div>
 
@@ -3385,7 +3387,7 @@ Catatan
 <p>Versi python yang digunakan adalah versi <code>3.11</code>. Pastikan membaca <code>README.md</code> untuk menjalankan notebook ini.</p>
 </div>
 </div></div><p>Pada bagian ini akan dilakukan pengaturan untuk lembar kerja dan mengambil dataset <code>Mroz</code> dari paket <code>causaldata</code>.</p>
-<div id="cell-2" class="cell" data-execution_count="2">
+<div id="cell-2" class="cell" data-execution_count="45">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># SETUP</span></span>
@@ -3430,20 +3432,20 @@ Output informasi dari data <code>Mroz</code>
 <section id="data-mroz" class="level2 page-columns page-full" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="data-mroz"><span class="header-section-number">2</span> Data <strong>Mroz</strong></h2>
 <p>Berdasarkan penjelasan singkat yang diperoleh dari <code>causaldata.Mroz</code>, Data <strong>Mroz</strong> merupakan sebuah dataset <em>cross-sectional</em> dari tahun 1975 yang berisi informasi tentang partisipasi tenaga kerja wanita di Amerika Serikat. Data ini dikumpulkan oleh Thomas A. Mroz sebagai bagian dari Panel Study of Income Dynamics (PSID).</p>
-<div class="cell" data-execution_count="3">
+<div class="cell" data-execution_count="46">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean up column names and show a sample of the data</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df_mroz <span class="op">=</span> data_mroz.set_index(data_mroz.columns[<span class="dv">0</span>]).rename_axis(<span class="st">&#39;no&#39;</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>df_mroz.sample(<span class="dv">5</span>)</span></code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div id="tbl-sample" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="3">
+<div id="tbl-sample" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="46">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sample-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Tabel 1: Sampel dataset Mroz
 </figcaption>
 <div aria-describedby="tbl-sample-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display" data-execution_count="3">
+<div class="cell-output cell-output-display" data-execution_count="46">
 <div>
 
 
@@ -3474,59 +3476,59 @@ Tabel 1: Sampel dataset Mroz
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">159</td>
-<td>True</td>
-<td>0</td>
-<td>1</td>
-<td>46</td>
-<td>True</td>
-<td>True</td>
-<td>1.443311</td>
-<td>10.000</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">461</td>
+<td data-quarto-table-cell-role="th">478</td>
 <td>False</td>
 <td>0</td>
 <td>3</td>
-<td>38</td>
+<td>35</td>
 <td>False</td>
 <td>False</td>
-<td>0.536588</td>
-<td>7.574</td>
+<td>0.555457</td>
+<td>10.867000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">716</td>
+<td>False</td>
+<td>0</td>
+<td>0</td>
+<td>47</td>
+<td>False</td>
+<td>False</td>
+<td>0.827522</td>
+<td>12.646000</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">77</td>
+<td data-quarto-table-cell-role="th">680</td>
+<td>False</td>
+<td>0</td>
+<td>0</td>
+<td>50</td>
 <td>True</td>
+<td>True</td>
+<td>1.731246</td>
+<td>63.200001</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">570</td>
+<td>False</td>
 <td>0</td>
 <td>2</td>
 <td>32</td>
 <td>False</td>
 <td>False</td>
-<td>-1.029619</td>
-<td>18.100</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">621</td>
-<td>False</td>
-<td>1</td>
-<td>4</td>
-<td>46</td>
-<td>False</td>
-<td>False</td>
-<td>0.790593</td>
-<td>30.650</td>
+<td>0.944836</td>
+<td>11.000000</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">547</td>
+<td data-quarto-table-cell-role="th">294</td>
+<td>True</td>
+<td>0</td>
+<td>0</td>
+<td>47</td>
 <td>False</td>
-<td>1</td>
-<td>2</td>
-<td>31</td>
 <td>False</td>
-<td>False</td>
-<td>0.573446</td>
-<td>10.190</td>
+<td>1.299839</td>
+<td>18.760000</td>
 </tr>
 </tbody>
 </table>
@@ -3538,7 +3540,7 @@ Tabel 1: Sampel dataset Mroz
 </div>
 </div>
 
-<div class="no-row-height column-margin column-container"><div id="cell-6" class="cell" data-execution_count="4">
+<div class="no-row-height column-margin column-container"><div id="cell-6" class="cell" data-execution_count="47">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Information about the dataset</span></span>
@@ -3622,7 +3624,7 @@ memory usage: 37.5 KB</code></pre>
 <section id="diagram-kausal-dag" class="level3" data-number="4.3">
 <h3 data-number="4.3" class="anchored" data-anchor-id="diagram-kausal-dag"><span class="header-section-number">4.3</span> Diagram Kausal (DAG)</h3>
 <p>Untuk menyederhanakan diagram atau model, dipertimbangan untuk mengabaikan variabel <code>lwg</code> dalam penyelesaian Causal Inference dalam lembar kerja ini. Berikut representasi visual dari hubungan kausal yang telah dibahas sebelumnya di atas:</p>
-<div id="cell-fig-dag-mroz" class="cell" data-execution_count="5">
+<div id="cell-fig-dag-mroz" class="cell" data-execution_count="48">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Definisikan variabel</span></span>
@@ -3639,8 +3641,8 @@ memory usage: 37.5 KB</code></pre>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot DAG</span></span>
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>dag.draw()</span></code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<div id="fig-dag-mroz" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-scap="DAG Mroz" data-fig-align="center">
+<div class="cell-output cell-output-display" data-execution_count="48">
+<div id="fig-dag-mroz" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center" data-fig-scap="DAG Mroz">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-dag-mroz-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <a href="causal_mroz_files/figure-html/fig-dag-mroz-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Gambar 1: Diagram Kausal Partisipasi Seorang Wanita dalam Tenaga Kerja"><img role="img" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIKICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPgo8IS0tIEdlbmVyYXRlZCBieSBncmFwaHZpeiB2ZXJzaW9uIDEyLjIuMCAoMjAyNDExMDMuMTkzMSkKIC0tPgo8IS0tIFBhZ2VzOiAxIC0tPgo8c3ZnIHdpZHRoPSIzNDdwdCIgaGVpZ2h0PSIxODhwdCIKIHZpZXdCb3g9IjAuMDAgMC4wMCAzNDcuMDAgMTg4LjAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj4KPGcgaWQ9ImdyYXBoMCIgY2xhc3M9ImdyYXBoIiB0cmFuc2Zvcm09InNjYWxlKDEgMSkgcm90YXRlKDApIHRyYW5zbGF0ZSg0IDE4NCkiPgo8cG9seWdvbiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSJub25lIiBwb2ludHM9Ii00LDQgLTQsLTE4NCAzNDMsLTE4NCAzNDMsNCAtNCw0Ii8+CjwhLS0gbHdnIC0tPgo8ZyBpZD0ibm9kZTEiIGNsYXNzPSJub2RlIj4KPHRpdGxlPmx3ZzwvdGl0bGU+CjxlbGxpcHNlIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGN4PSI1NCIgY3k9Ii0xNjIiIHJ4PSIyNyIgcnk9IjE4Ii8+Cjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjU0IiB5PSItMTU2Ljk1IiBmb250LWZhbWlseT0iVGltZXMgTmV3IFJvbWFuLHNlcmlmIiBmb250LXNpemU9IjE0LjAwIj5sd2c8L3RleHQ+CjwvZz4KPCEtLSBpbmMgLS0+CjxnIGlkPSJub2RlMiIgY2xhc3M9Im5vZGUiPgo8dGl0bGU+aW5jPC90aXRsZT4KPGVsbGlwc2UgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgY3g9IjI4NSIgY3k9Ii05MCIgcng9IjI3IiByeT0iMTgiLz4KPHRleHQgdGV4dC1hbmNob3I9Im1pZGRsZSIgeD0iMjg1IiB5PSItODQuOTUiIGZvbnQtZmFtaWx5PSJUaW1lcyBOZXcgUm9tYW4sc2VyaWYiIGZvbnQtc2l6ZT0iMTQuMDAiPmluYzwvdGV4dD4KPC9nPgo8IS0tIGxmcCAtLT4KPGcgaWQ9Im5vZGU3IiBjbGFzcz0ibm9kZSI+Cjx0aXRsZT5sZnA8L3RpdGxlPgo8ZWxsaXBzZSBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBjeD0iMTgyIiBjeT0iLTE4IiByeD0iMjciIHJ5PSIxOCIvPgo8dGV4dCB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSIxODIiIHk9Ii0xMi45NSIgZm9udC1mYW1pbHk9IlRpbWVzIE5ldyBSb21hbixzZXJpZiIgZm9udC1zaXplPSIxNC4wMCI+bGZwPC90ZXh0Pgo8L2c+CjwhLS0gaW5jJiM0NTsmZ3Q7bGZwIC0tPgo8ZyBpZD0iZWRnZTEwIiBjbGFzcz0iZWRnZSI+Cjx0aXRsZT5pbmMmIzQ1OyZndDtsZnA8L3RpdGxlPgo8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBkPSJNMjY2LjU5LC03Ni40OUMyNTAuNzcsLTY1LjczIDIyNy43MywtNTAuMDggMjA5LjY5LC0zNy44MiIvPgo8cG9seWdvbiBmaWxsPSJibGFjayIgc3Ryb2tlPSJibGFjayIgcG9pbnRzPSIyMTEuNzQsLTM0Ljk4IDIwMS41MSwtMzIuMjYgMjA3LjgxLC00MC43NyAyMTEuNzQsLTM0Ljk4Ii8+CjwvZz4KPCEtLSBrNSAtLT4KPGcgaWQ9Im5vZGUzIiBjbGFzcz0ibm9kZSI+Cjx0aXRsZT5rNTwvdGl0bGU+CjxlbGxpcHNlIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGN4PSIyNyIgY3k9Ii05MCIgcng9IjI3IiByeT0iMTgiLz4KPHRleHQgdGV4dC1hbmNob3I9Im1pZGRsZSIgeD0iMjciIHk9Ii04NC45NSIgZm9udC1mYW1pbHk9IlRpbWVzIE5ldyBSb21hbixzZXJpZiIgZm9udC1zaXplPSIxNC4wMCI+azU8L3RleHQ+CjwvZz4KPCEtLSBrNSYjNDU7Jmd0O2xmcCAtLT4KPGcgaWQ9ImVkZ2UxIiBjbGFzcz0iZWRnZSI+Cjx0aXRsZT5rNSYjNDU7Jmd0O2xmcDwvdGl0bGU+CjxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGQ9Ik00OC42NywtNzguNjdDNTMuMzgsLTc2LjQ1IDU4LjM1LC03NC4xMyA2MywtNzIgOTIuMjQsLTU4LjU5IDEyNS43MSwtNDMuNzIgMTQ5LjcsLTMzLjE1Ii8+Cjxwb2x5Z29uIGZpbGw9ImJsYWNrIiBzdHJva2U9ImJsYWNrIiBwb2ludHM9IjE1MC44NywtMzYuNDYgMTU4LjYyLC0yOS4yMyAxNDguMDUsLTMwLjA2IDE1MC44NywtMzYuNDYiLz4KPC9nPgo8IS0tIHdjIC0tPgo8ZyBpZD0ibm9kZTQiIGNsYXNzPSJub2RlIj4KPHRpdGxlPndjPC90aXRsZT4KPGVsbGlwc2UgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgY3g9Ijk5IiBjeT0iLTkwIiByeD0iMjciIHJ5PSIxOCIvPgo8dGV4dCB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSI5OSIgeT0iLTg0Ljk1IiBmb250LWZhbWlseT0iVGltZXMgTmV3IFJvbWFuLHNlcmlmIiBmb250LXNpemU9IjE0LjAwIj53YzwvdGV4dD4KPC9nPgo8IS0tIHdjJiM0NTsmZ3Q7bGZwIC0tPgo8ZyBpZD0iZWRnZTciIGNsYXNzPSJlZGdlIj4KPHRpdGxlPndjJiM0NTsmZ3Q7bGZwPC90aXRsZT4KPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgZD0iTTExNS40LC03NS4xN0MxMjcuMjIsLTY1LjIgMTQzLjQsLTUxLjU2IDE1Ni44NSwtNDAuMjEiLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMTU5LjA5LC00Mi45IDE2NC40OCwtMzMuNzggMTU0LjU4LC0zNy41NSAxNTkuMDksLTQyLjkiLz4KPC9nPgo8IS0tIGFnZSAtLT4KPGcgaWQ9Im5vZGU1IiBjbGFzcz0ibm9kZSI+Cjx0aXRsZT5hZ2U8L3RpdGxlPgo8ZWxsaXBzZSBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBjeD0iMTI2IiBjeT0iLTE2MiIgcng9IjI3IiByeT0iMTgiLz4KPHRleHQgdGV4dC1hbmNob3I9Im1pZGRsZSIgeD0iMTI2IiB5PSItMTU2Ljk1IiBmb250LWZhbWlseT0iVGltZXMgTmV3IFJvbWFuLHNlcmlmIiBmb250LXNpemU9IjE0LjAwIj5hZ2U8L3RleHQ+CjwvZz4KPCEtLSBhZ2UmIzQ1OyZndDtrNSAtLT4KPGcgaWQ9ImVkZ2U1IiBjbGFzcz0iZWRnZSI+Cjx0aXRsZT5hZ2UmIzQ1OyZndDtrNTwvdGl0bGU+CjxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGQ9Ik0xMDcuODQsLTE0OC4xNkM5Mi43NywtMTM3LjUgNzEuMTEsLTEyMi4xOSA1NC4wMSwtMTEwLjEiLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iNTYuNDYsLTEwNy41NSA0Ni4yOCwtMTA0LjYzIDUyLjQyLC0xMTMuMjYgNTYuNDYsLTEwNy41NSIvPgo8L2c+CjwhLS0gYWdlJiM0NTsmZ3Q7d2MgLS0+CjxnIGlkPSJlZGdlMyIgY2xhc3M9ImVkZ2UiPgo8dGl0bGU+YWdlJiM0NTsmZ3Q7d2M8L3RpdGxlPgo8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBkPSJNMTE5LjQ2LC0xNDQuMDVDMTE2LjQ4LC0xMzYuMzIgMTEyLjg3LC0xMjYuOTYgMTA5LjUyLC0xMTguMjciLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMTEyLjg4LC0xMTcuMjcgMTA2LjAyLC0xMDkuMiAxMDYuMzUsLTExOS43OSAxMTIuODgsLTExNy4yNyIvPgo8L2c+CjwhLS0gYWdlJiM0NTsmZ3Q7bGZwIC0tPgo8ZyBpZD0iZWRnZTQiIGNsYXNzPSJlZGdlIj4KPHRpdGxlPmFnZSYjNDU7Jmd0O2xmcDwvdGl0bGU+CjxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGQ9Ik0xMzIuNjQsLTE0NC4xNUMxNDIuMTYsLTEyMC4wMyAxNTkuNzcsLTc1LjM2IDE3MS4xOCwtNDYuNDMiLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMTc0LjQsLTQ3LjgyIDE3NC44MSwtMzcuMjMgMTY3Ljg4LC00NS4yNSAxNzQuNCwtNDcuODIiLz4KPC9nPgo8IS0tIGs2MTggLS0+CjxnIGlkPSJub2RlOCIgY2xhc3M9Im5vZGUiPgo8dGl0bGU+azYxODwvdGl0bGU+CjxlbGxpcHNlIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGN4PSIyMTEiIGN5PSItOTAiIHJ4PSIyOS4zNCIgcnk9IjE4Ii8+Cjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjIxMSIgeT0iLTg0Ljk1IiBmb250LWZhbWlseT0iVGltZXMgTmV3IFJvbWFuLHNlcmlmIiBmb250LXNpemU9IjE0LjAwIj5rNjE4PC90ZXh0Pgo8L2c+CjwhLS0gYWdlJiM0NTsmZ3Q7azYxOCAtLT4KPGcgaWQ9ImVkZ2U2IiBjbGFzcz0iZWRnZSI+Cjx0aXRsZT5hZ2UmIzQ1OyZndDtrNjE4PC90aXRsZT4KPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgZD0iTTE0Mi4zOSwtMTQ3LjVDMTU0LjU4LC0xMzcuNDcgMTcxLjQ0LC0xMjMuNTggMTg1LjQsLTExMi4wOCIvPgo8cG9seWdvbiBmaWxsPSJibGFjayIgc3Ryb2tlPSJibGFjayIgcG9pbnRzPSIxODcuNDIsLTExNC45NiAxOTIuOTEsLTEwNS45IDE4Mi45NywtMTA5LjU1IDE4Ny40MiwtMTE0Ljk2Ii8+CjwvZz4KPCEtLSBoYyAtLT4KPGcgaWQ9Im5vZGU2IiBjbGFzcz0ibm9kZSI+Cjx0aXRsZT5oYzwvdGl0bGU+CjxlbGxpcHNlIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGN4PSIzMTIiIGN5PSItMTYyIiByeD0iMjciIHJ5PSIxOCIvPgo8dGV4dCB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSIzMTIiIHk9Ii0xNTYuOTUiIGZvbnQtZmFtaWx5PSJUaW1lcyBOZXcgUm9tYW4sc2VyaWYiIGZvbnQtc2l6ZT0iMTQuMDAiPmhjPC90ZXh0Pgo8L2c+CjwhLS0gaGMmIzQ1OyZndDtpbmMgLS0+CjxnIGlkPSJlZGdlOSIgY2xhc3M9ImVkZ2UiPgo8dGl0bGU+aGMmIzQ1OyZndDtpbmM8L3RpdGxlPgo8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBkPSJNMzA1LjQ2LC0xNDQuMDVDMzAyLjQ4LC0xMzYuMzIgMjk4Ljg3LC0xMjYuOTYgMjk1LjUyLC0xMTguMjciLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMjk4Ljg4LC0xMTcuMjcgMjkyLjAyLC0xMDkuMiAyOTIuMzUsLTExOS43OSAyOTguODgsLTExNy4yNyIvPgo8L2c+CjwhLS0gaGMmIzQ1OyZndDtsZnAgLS0+CjxnIGlkPSJlZGdlOCIgY2xhc3M9ImVkZ2UiPgo8dGl0bGU+aGMmIzQ1OyZndDtsZnA8L3RpdGxlPgo8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBkPSJNMzE5LjcxLC0xNDQuM0MzMjcuMywtMTI1LjEgMzM1LjgsLTkzLjQ5IDMyMSwtNzIgMjk4LjUyLC0zOS4zNyAyNTMuMDcsLTI2LjgyIDIyMC4yNSwtMjEuOTkiLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMjIxLjA5LC0xOC41NyAyMTAuNzIsLTIwLjc4IDIyMC4yLC0yNS41MiAyMjEuMDksLTE4LjU3Ii8+CjwvZz4KPCEtLSBrNjE4JiM0NTsmZ3Q7bGZwIC0tPgo8ZyBpZD0iZWRnZTIiIGNsYXNzPSJlZGdlIj4KPHRpdGxlPms2MTgmIzQ1OyZndDtsZnA8L3RpdGxlPgo8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBkPSJNMjAzLjk4LC03Mi4wNUMyMDAuNzcsLTY0LjMyIDE5Ni45LC01NC45NiAxOTMuMywtNDYuMjciLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMTk2LjYsLTQ1LjA5IDE4OS41MywtMzcuMTkgMTkwLjEzLC00Ny43NyAxOTYuNiwtNDUuMDkiLz4KPC9nPgo8L2c+Cjwvc3ZnPgo=" class="img-fluid quarto-figure quarto-figure-center figure-img" data-fig-scap="DAG Mroz"></a>
@@ -3665,7 +3667,7 @@ Gambar 1: Diagram Kausal Partisipasi Seorang Wanita dalam Tenaga Kerja
 <h4 data-number="5.1.1" class="anchored" data-anchor-id="data-numerikal"><span class="header-section-number">5.1.1</span> Data Numerikal</h4>
 <p>Untuk memahami karakteristik numerik dalam dataset, langkah selanjutnya adalah menganalisis statistik deskriptif variabel-variabel numerik. Analisis ini akan memberikan gambaran tentang distribusi, ukuran pemusatan, dan penyebaran data.</p>
 
-<div class="no-row-height column-margin column-container"><div id="cell-16" class="cell" data-execution_count="6">
+<div class="no-row-height column-margin column-container"><div id="cell-16" class="cell" data-execution_count="49">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Information about the dataset</span></span>
@@ -3688,18 +3690,18 @@ Data columns (total 8 columns):
 dtypes: bool(3), float64(2), int64(3)
 memory usage: 37.5 KB</code></pre>
 </div>
-</div></div><div class="cell" data-execution_count="7">
+</div></div><div class="cell" data-execution_count="50">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>df_mroz.describe()</span></code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div id="tbl-describe" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="7">
+<div id="tbl-describe" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="50">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-describe-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Tabel 2: Deskripsi Statistik Mroz
 </figcaption>
 <div aria-describedby="tbl-describe-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display" data-execution_count="7">
+<div class="cell-output cell-output-display" data-execution_count="50">
 <div>
 
 
@@ -3859,7 +3861,7 @@ text-align: right;
 }
 </style>
 
-<div id="tbl-prop-1" class="dataframe do-not-create-environment quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" data-border="1">
+<div id="tbl-prop-1" class="dataframe do-not-create-environment quarto-float quarto-figure quarto-figure-center anchored" data-border="1" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-prop-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (a) Jumlah Data Kategorikal
@@ -3911,7 +3913,7 @@ text-align: right;
 }
 </style>
 
-<div id="tbl-prop-2" class="dataframe do-not-create-environment quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" data-border="1">
+<div id="tbl-prop-2" class="dataframe do-not-create-environment quarto-float quarto-figure quarto-figure-center anchored" data-border="1" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-prop-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (b) Proporsi Data Kategorikal
@@ -4021,7 +4023,7 @@ text-align: right;
 }
 </style>
 
-<div id="tbl-crosstab-1" class="dataframe do-not-create-environment quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" data-border="1">
+<div id="tbl-crosstab-1" class="dataframe do-not-create-environment quarto-float quarto-figure quarto-figure-center anchored" data-border="1" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-crosstab-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (a) lfp vs. wc
@@ -4073,7 +4075,7 @@ text-align: right;
 }
 </style>
 
-<div id="tbl-crosstab-2" class="dataframe do-not-create-environment quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" data-border="1">
+<div id="tbl-crosstab-2" class="dataframe do-not-create-environment quarto-float quarto-figure quarto-figure-center anchored" data-border="1" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-crosstab-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (b) lfp vs. wc (Proporsi)
@@ -4127,7 +4129,7 @@ text-align: right;
 }
 </style>
 
-<div id="tbl-crosstab-3" class="dataframe do-not-create-environment quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" data-border="1">
+<div id="tbl-crosstab-3" class="dataframe do-not-create-environment quarto-float quarto-figure quarto-figure-center anchored" data-border="1" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-crosstab-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (c) lfp vs. hc
@@ -4179,7 +4181,7 @@ text-align: right;
 }
 </style>
 
-<div id="tbl-crosstab-4" class="dataframe do-not-create-environment quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" data-border="1">
+<div id="tbl-crosstab-4" class="dataframe do-not-create-environment quarto-float quarto-figure quarto-figure-center anchored" data-border="1" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-crosstab-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (d) lfp vs. hc (Proporsi)
@@ -4233,7 +4235,7 @@ text-align: right;
 }
 </style>
 
-<div id="tbl-crosstab-5" class="dataframe do-not-create-environment quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" data-border="1">
+<div id="tbl-crosstab-5" class="dataframe do-not-create-environment quarto-float quarto-figure quarto-figure-center anchored" data-border="1" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-crosstab-5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (e) wc vs. hc
@@ -4285,7 +4287,7 @@ text-align: right;
 }
 </style>
 
-<div id="tbl-crosstab-6" class="dataframe do-not-create-environment quarto-float quarto-figure quarto-figure-center anchored" data-quarto-postprocess="true" data-border="1">
+<div id="tbl-crosstab-6" class="dataframe do-not-create-environment quarto-float quarto-figure quarto-figure-center anchored" data-border="1" data-quarto-postprocess="true">
 <figure class="quarto-float quarto-subfloat-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-subfloat-caption quarto-subfloat-tbl" id="tbl-crosstab-6-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 (f) wc vs. hc (Proporsi)
@@ -4359,7 +4361,7 @@ text-align: right;
 <section id="pairplot" class="level4 page-columns page-full" data-number="5.2.1">
 <h4 data-number="5.2.1" class="anchored" data-anchor-id="pairplot"><span class="header-section-number">5.2.1</span> Pairplot</h4>
 <p>Visualisasi menggunakan pairplot merupakan langkah awal yang efisien dalam eksplorasi data Mroz karena mampu menampilkan distribusi setiap variabel dan hubungan antar variabel secara simultan dalam satu tampilan. Dengan pembedaan warna berdasarkan partisipasi tenaga kerja (<code>lfp</code>), pairplot membantu mengidentifikasi pola, outlier, dan potensi hubungan yang relevan untuk analisis kausal selanjutnya.</p>
-<div id="cell-fig-pairplot" class="cell page-columns page-full" data-execution_count="10">
+<div id="cell-fig-pairplot" class="cell page-columns page-full" data-execution_count="53">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>sns.pairplot(df_mroz[[<span class="st">&#39;wc&#39;</span>, <span class="st">&#39;hc&#39;</span>, <span class="st">&#39;lfp&#39;</span>, <span class="st">&#39;age&#39;</span>, <span class="st">&#39;k5&#39;</span>, <span class="st">&#39;k618&#39;</span>, <span class="st">&#39;inc&#39;</span>]], hue<span class="op">=</span><span class="st">&#39;lfp&#39;</span>)<span class="op">;</span></span></code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -4416,7 +4418,7 @@ Gambar 2: Pairplot Mroz
 <section id="histogram" class="level4" data-number="5.2.2">
 <h4 data-number="5.2.2" class="anchored" data-anchor-id="histogram"><span class="header-section-number">5.2.2</span> Histogram</h4>
 <p>Untuk memahami karakteristik sampel dan pola hubungan antar variabel, berikut disajikan histogram yang menggambarkan distribusi usia, jumlah anak, dan pendapatan keluarga, di mana setiap variabel dikelompokkan berdasarkan status partisipasi kerja wanita.</p>
-<div class="cell" data-layout="[[1,1],[1]]" data-align="center" data-execution_count="11">
+<div class="cell" data-layout="[[1,1],[1]]" data-align="center" data-execution_count="54">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>sns.histplot(</span>
@@ -4519,7 +4521,7 @@ Gambar 3: Visualisasi Histogram terhadap berbagai variabel
 <section id="correlation-matrix" class="level4" data-number="5.2.3">
 <h4 data-number="5.2.3" class="anchored" data-anchor-id="correlation-matrix"><span class="header-section-number">5.2.3</span> Correlation Matrix</h4>
 <p>Untuk melengkapi analisis sebelumnya, correlation matrix digunakan untuk memvisualisasikan dan mengukur kekuatan hubungan linear antar variabel dalam data Mroz. Meskipun korelasi tidak mengimplikasikan kausalitas, pola yang terungkap dapat membantu memvalidasi struktur kausal yang telah dihipotesiskan dalam DAG.</p>
-<div id="cell-fig-corr" class="cell" data-execution_count="12">
+<div id="cell-fig-corr" class="cell" data-execution_count="55">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>corr <span class="op">=</span> df_mroz.corr()</span>
@@ -4601,7 +4603,7 @@ Kenapa Distance Matching?
 </div></div><section id="persiapan-data" class="level3 page-columns page-full" data-number="6.1">
 <h3 data-number="6.1" class="anchored" data-anchor-id="persiapan-data"><span class="header-section-number">6.1</span> Persiapan Data</h3>
 <p>Berdasarkan eksplorasi data sebelumnya dan diagram kausal (DAG) yang telah dibuat (<a href="#fig-dag-mroz" class="quarto-xref">Gambar 1</a>), persiapan data untuk pemodelan kausal akan berfokus pada tiga komponen utama: variabel treatment (<code>wc</code>), variabel outcome (<code>lfp</code>), dan variabel <em>confounding</em> yang telah diidentifikasi. Variabel <em>confounding</em> yang akan digunakan mencakup usia (<code>age</code>), pendidikan suami (<code>hc</code>), jumlah anak balita (<code>k5</code>), jumlah anak usia sekolah (<code>k618</code>), pendapatan keluarga (<code>inc</code>). Pemilihan variabel ini konsisten dengan struktur DAG yang menunjukkan jalur-jalur yang mempengaruhi baik <em>treatment</em> (<code>D</code>) maupun <em>outcome</em> (<code>Y</code>).</p>
-<div class="cell" data-execution_count="13">
+<div class="cell" data-execution_count="56">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>int_columns <span class="op">=</span> [<span class="st">&#39;lfp&#39;</span>, <span class="st">&#39;wc&#39;</span>, <span class="st">&#39;hc&#39;</span>]</span>
@@ -4613,13 +4615,13 @@ Kenapa Distance Matching?
 <span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;Confounding&#39;</span>: confounding_column</span>
 <span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div id="tbl-confounding" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="13">
+<div id="tbl-confounding" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="56">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-confounding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Tabel 5: Tabel Variabel Confounding
 </figcaption>
 <div aria-describedby="tbl-confounding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display" data-execution_count="13">
+<div class="cell-output cell-output-display" data-execution_count="56">
 <div>
 
 
@@ -4667,7 +4669,7 @@ Tabel 5: Tabel Variabel Confounding
 </div>
 </div>
 <p>Untuk implementasi dengan package <code>causalinference</code> menggunakan kelas <code>CausalModel</code>, data perlu diorganisir dalam format yang sesuai. Variabel treatment (<code>wc</code>) dan outcome (<code>lfp</code>) berbentuk biner (0/1), sedangkan variabel confounding akan dijadikan sebagai matrix <code>X</code>. Perlu diperhatikan bahwa beberapa variabel numerik seperti <code>inc</code> menunjukkan distribusi yang skewed berdasarkan analisis sebelumnya, namun pada langkah awal ini tidak akan dilakukan transformasi data. Variabel-variabel ini akan digunakan dalam pemodelan untuk mengestimasi <em>Average Treatment Effect</em> (ATE) dan <em>Average Treatment Effect on the Treated</em> (ATT).</p>
-<div id="cell-39" class="cell" data-execution_count="14">
+<div id="cell-39" class="cell" data-execution_count="57">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>Y_outcome_var <span class="op">=</span> df_mroz[<span class="st">&#39;lfp&#39;</span>].to_numpy()</span>
@@ -4772,7 +4774,7 @@ Mean sebagai Persentase?
 <p>Membandingkan hasil dari kedua spesifikasi ini dapat memberikan insight tentang stabilitas estimasi efek kausal dan membantu menilai sensitivitas hasil terhadap pilihan jumlah matches.</p>
 <section id="hasil-one-to-one-matching" class="level5" data-number="6.2.1.1">
 <h5 data-number="6.2.1.1" class="anchored" data-anchor-id="hasil-one-to-one-matching"><span class="header-section-number">6.2.1.1</span> Hasil <em>One-to-One Matching</em></h5>
-<div id="cell-44" class="cell">
+<div id="cell-44" class="cell" data-execution_count="58">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>mroz_causal_model.reset()</span>
@@ -4796,7 +4798,7 @@ Treatment Effect Estimates: Matching
 </section>
 <section id="hasil-one-to-two-matching" class="level5" data-number="6.2.1.2">
 <h5 data-number="6.2.1.2" class="anchored" data-anchor-id="hasil-one-to-two-matching"><span class="header-section-number">6.2.1.2</span> Hasil <em>One-to-Two Matching</em></h5>
-<div id="cell-47" class="cell" data-execution_count="24">
+<div id="cell-47" class="cell" data-execution_count="59">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>mroz_causal_model.reset()</span>
@@ -4821,13 +4823,104 @@ Treatment Effect Estimates: Matching
 </section>
 <section id="propensity-score-matching" class="level3" data-number="6.3">
 <h3 data-number="6.3" class="anchored" data-anchor-id="propensity-score-matching"><span class="header-section-number">6.3</span> <em>Propensity Score Matching</em></h3>
+<p>Hasil <em>distance matching</em> memberikan bukti awal yang kuat tentang efek kausal pendidikan tinggi terhadap partisipasi kerja wanita. Baik dengan pendekatan <em>one-to-one matching</em> maupun <em>one-to-two matching</em>, ditemukan peningkatan probabilitas partisipasi kerja sebesar <em>23.6-25 percentage points</em> pada wanita yang mengenyam pendidikan tinggi. Konsistensi estimasi ini, dengan <em>standard error</em> yang lebih kecil pada one-to-two matching (0.066 vs 0.078), memberikan kepercayaan awal terhadap robustness temuan kausal ini.</p>
+<p>Untuk lebih memperkuat validitas temuan tersebut, analisis dilanjutkan dengan <em>propensity score matching (PSM)</em>.</p>
+<section id="estimated-parameters-of-propensity-score" class="level4" data-number="6.3.1">
+<h4 data-number="6.3.1" class="anchored" data-anchor-id="estimated-parameters-of-propensity-score"><span class="header-section-number">6.3.1</span> <em>Estimated Parameters of Propensity Score</em></h4>
+<div id="cell-51" class="cell" data-execution_count="60">
+<details class="code-fold">
+<summary>Kode</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>mroz_causal_model.reset()</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>mroz_causal_model.est_propensity()</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(mroz_causal_model.propensity)</span></code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Estimated Parameters of Propensity Score
+
+                    Coef.       S.e.          z      P&gt;|z|      [95% Conf. int.]
+--------------------------------------------------------------------------------
+     Intercept     -2.511      0.709     -3.542      0.000     -3.900     -1.121
+            X0      0.195      0.200      0.975      0.330     -0.197      0.586
+            X1     -0.180      0.082     -2.191      0.028     -0.341     -0.019
+            X2     -0.001      0.014     -0.080      0.936     -0.030      0.027
+            X3      2.472      0.214     11.540      0.000      2.052      2.892
+            X4      0.024      0.009      2.768      0.006      0.007      0.041
+</code></pre>
+</div>
+</div>
+<p>Tabel tersebut menampilkan propensity score, dalam konteks ini, merepresentasikan probabilitas seorang wanita untuk berkuliah (<code>wc</code> = 1) berdasarkan variabel <em>confounding</em>: jumlah anak balita (<code>X0</code> atau <code>k5</code>), anak usia sekolah (<code>X1</code> atau <code>k618</code>), usia (<code>X2</code> atau <code>age</code>), pendidikan suami (<code>X3</code> atau <code>hc</code>), dan pendapatan keluarga (<code>X4</code> atau <code>inc</code>). Berikut interpretasinya:</p>
+<ol type="1">
+<li><p><strong>Pengaruh Pendidikan Suami (X3/hc):</strong> Koefisien positif yang besar dan sangat signifikan (2.472, p &lt; 0.001) pada <code>hc</code> menunjukkan bahwa suami berpendidikan tinggi sangat meningkatkan kemungkinan istri juga berpendidikan tinggi. Hal ini sesuai dengan analisis korelasi dan tabel kontingensi sebelumnya yang mengindikasikan <em>assortative mating</em>. <code>hc</code> menjadi prediktor terkuat dalam model propensity score.</p></li>
+<li><p><strong>Pengaruh Pendapatan Keluarga (X4/inc):</strong> Koefisien positif yang lebih kecil namun tetap signifikan (0.024, p &lt; 0.006) pada <code>inc</code> menunjukkan pendapatan keluarga yang lebih tinggi meningkatkan kemungkinan istri berkuliah. Ini masuk akal mengingat keluarga dengan pendapatan lebih tinggi mungkin memiliki kemampuan untuk investasi pendidikan.</p></li>
+<li><p><strong>Pengaruh Jumlah Anak Usia Sekolah (X1/k618):</strong> Koefisien negatif yang signifikan (-0.180, p &lt; 0.028) pada <code>k618</code> menunjukkan bahwa wanita dengan lebih banyak anak usia sekolah cenderung memiliki probabilitas lebih rendah untuk memiliki latar belakang pendidikan tinggi.</p></li>
+<li><p><strong>Variabel Non-Signifikan:</strong> <code>k5</code> (jumlah anak balita) dan <code>age</code> tidak signifikan dalam model ini. Meskipun pada EDA dan distance matching variabel-variabel ini dipertimbangkan sebagai <em>potential confounder</em>, model propensity score mengindikasikan bahwa pengaruh kedua variabel ini terhadap keputusan berkuliah relatif kecil setelah memperhitungkan variabel lain.</p></li>
+</ol>
+</section>
+<section id="trimming" class="level4" data-number="6.3.2">
+<h4 data-number="6.3.2" class="anchored" data-anchor-id="trimming"><span class="header-section-number">6.3.2</span> <em>Trimming</em></h4>
+<p>Setelah mendapatkan estimasi <em>propensity score</em>, langkah selanjutnya adalah melakukan <em>trimming</em> untuk memastikan kualitas matching yang lebih baik. Trimming diperlukan karena hasil estimasi propensity score menunjukkan beberapa karakteristik yang sangat berbeda antara kelompok treatment dan control, terutama pada variabel pendidikan suami (X3) yang memiliki koefisien sangat tinggi (2.472) dan sangat signifikan (p &lt; 0.001). Perbedaan yang ekstrem ini dapat menyebabkan kesulitan dalam menemukan pasangan yang sebanding antara wanita berpendidikan tinggi dan tidak berpendidikan tinggi dengan karakteristik serupa. Dengan melakukan trimming, diharapkan estimasi efek kausal yang dihasilkan akan lebih meyakinkan.</p>
+<div id="cell-54" class="cell" data-execution_count="61">
+<details class="code-fold">
+<summary>Kode</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>mroz_causal_model.trim_s()</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(mroz_causal_model.summary_stats)</span></code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Summary Statistics
+
+                       Controls (N_c=489)         Treated (N_t=209)             
+       Variable         Mean         S.d.         Mean         S.d.     Raw-diff
+--------------------------------------------------------------------------------
+              Y        0.511        0.500        0.679        0.468        0.168
+
+                       Controls (N_c=489)         Treated (N_t=209)             
+       Variable         Mean         S.d.         Mean         S.d.     Nor-diff
+--------------------------------------------------------------------------------
+             X0        0.213        0.461        0.335        0.667        0.213
+             X1        1.160        1.155        1.225        1.190        0.056
+             X2       43.331        8.083       41.823        8.245       -0.185
+             X3        0.254        0.436        0.818        0.387        1.371
+             X4       18.883        9.923       25.535       13.992        0.548
+</code></pre>
+</div>
+</div>
+<p>Hasil trimming menunjukkan perubahan dalam komposisi sampel <a href="#persiapan-data">sebelumnya</a>, di mana jumlah observasi berkurang dari 541 menjadi 489 untuk kelompok control dan dari 212 menjadi 209 untuk kelompok treatment. Perubahan ukuran sampel yang lebih besar pada kelompok control (berkurang 52 observasi) dibandingkan kelompok treatment (berkurang 3 observasi) mengindikasikan bahwa sebagian besar observasi yang dihapus adalah dari kelompok control yang memiliki karakteristik sangat berbeda dari kelompok treatment. Menariknya, raw difference untuk variabel outcome (Y) meningkat sedikit dari 0.154 menjadi 0.168, menunjukkan bahwa perbedaan dalam tingkat partisipasi kerja antara wanita berpendidikan tinggi dan tidak justru sedikit lebih besar setelah trimming.</p>
+<p>Ditinjau dari normalized differences, trimming menghasilkan perubahan yang bervariasi pada keseimbangan kovariat. Ketidakseimbangan dalam pendidikan suami (<code>X3</code>) sedikit membaik dengan normalized difference berkurang dari 1.413 menjadi 1.371, meskipun tetap menunjukkan perbedaan yang substansial. Pendapatan keluarga (<code>X4</code>) juga menunjukkan sedikit perbaikan dengan normalized difference berkurang dari 0.591 menjadi 0.548. Namun, beberapa variabel seperti jumlah anak balita (<code>X0</code>) dan usia (<code>X2</code>) menunjukkan sedikit perbaikan dalam ketidakseimbangan, dengan normalized difference untuk <code>X0</code> berubah dari 0.226 menjadi 0.213 dan <code>X2</code> dari -0.141 menjadi -0.185. Perubahan-perubahan ini konsisten dengan hasil estimasi propensity score sebelumnya yang menunjukkan pengaruh kuat dari pendidikan suami dan pendapatan keluarga dalam menentukan probabilitas seorang wanita memiliki pendidikan tinggi.</p>
+</section>
+<section id="estimasi-propensity-score-matching" class="level4" data-number="6.3.3">
+<h4 data-number="6.3.3" class="anchored" data-anchor-id="estimasi-propensity-score-matching"><span class="header-section-number">6.3.3</span> Estimasi <em>Propensity Score Matching</em></h4>
+<p>Setelah melakukan <em>trimming</em> untuk memastikan perbandingan dilakukan pada observasi dengan karakteristik yang sebanding, langkah selanjutnya adalah mengestimasi efek kausal menggunakan <em>propensity score matching</em>. Estimasi ini akan memberikan pengukuran yang lebih akurat tentang pengaruh pendidikan tinggi terhadap partisipasi kerja wanita, dengan mempertimbangkan keseimbangan kovariat yang telah diperbaiki melalui proses trimming sebelumnya.</p>
+<div id="cell-57" class="cell" data-execution_count="62">
+<details class="code-fold">
+<summary>Kode</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>mroz_causal_model.est_via_matching()</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(mroz_causal_model.estimates)</span></code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Treatment Effect Estimates: Matching
+
+                     Est.       S.e.          z      P&gt;|z|      [95% Conf. int.]
+--------------------------------------------------------------------------------
+           ATE      0.282      0.077      3.665      0.000      0.131      0.433
+           ATC      0.317      0.093      3.407      0.001      0.135      0.499
+           ATT      0.201      0.079      2.535      0.011      0.046      0.356
+</code></pre>
+</div>
+</div>
+<p>Hasil <em>propensity score matching</em> setelah trimming menunjukkan Average Treatment Effect (ATE) sebesar 0.282 (p &lt; 0.001), lebih tinggi dibandingkan estimasi sebelum trimming yang sebesar 0.250 (p = 0.001) (dapat dilihat pada bagian <a href="#hasil-one-to-one-matching">one-to-one matching</a>). Peningkatan estimasi ATE dari 25% menjadi 28.2% ini merepresentasikan perbaikan estimasi setelah mempertimbangkan keseimbangan kovariat yang lebih baik melalui proses trimming. Secara substantif, hasil ini mengindikasikan bahwa pendidikan tinggi meningkatkan probabilitas partisipasi kerja wanita sebesar 28.2 percentage points, dengan interval kepercayaan 95% [0.131, 0.433] yang tidak mencakup nol. Yang menarik, meskipun ukuran sampel berkurang setelah trimming, standard error tetap stabil (0.077 vs 0.078) dan p-value tetap sangat signifikan (p &lt; 0.001), mengindikasikan estimasi yang lebih efisien dan robust.</p>
+<p>Menariknya, temuan ini konsisten dengan dan memperkuat hasil distance matching sebelumnya yang mengestimasi efek sebesar 23.6-25 percentage points, namun dengan estimasi yang sedikit lebih tinggi. Konsistensi estimasi dari berbagai metode matching ini (distance matching, propensity score matching dengan dan tanpa trimming) memberikan kepercayaan yang lebih besar terhadap robustness temuan kausal dalam studi ini.</p>
+</section>
 </section>
 </section>
 <section id="kesimpulan" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="kesimpulan"><span class="header-section-number">7</span> Kesimpulan</h2>
-<section id="limitasi-dan-saran" class="level3" data-number="7.1">
-<h3 data-number="7.1" class="anchored" data-anchor-id="limitasi-dan-saran"><span class="header-section-number">7.1</span> Limitasi dan Saran</h3>
-</section>
+<p>Hasil analisis menggunakan berbagai metode <em>matching</em> secara konsisten menunjukkan bahwa pendidikan tinggi memiliki efek kausal positif yang substansial terhadap partisipasi kerja wanita. Estimasi <em>Average Treatment Effect</em> (ATE) dari <em>distance matching</em> dengan <em>one-to-one matching</em> menunjukkan peningkatan probabilitas partisipasi kerja sebesar 25 <em>percentage points</em> (95% CI: [0.096, 0.403], p = 0.001), sementara <em>one-to-two matching</em> menghasilkan estimasi serupa sebesar 23.6 <em>percentage points</em> (95% CI: [0.107, 0.366], p &lt; 0.001) dengan standard error yang lebih kecil (0.066 vs 0.078). Hasil ini diperkuat oleh propensity score matching setelah trimming yang mengestimasi efek sebesar 28.2 percentage points (95% CI: [0.131, 0.433], p &lt; 0.001), menunjukkan <em>robustness</em> hasil setelah memperbaiki keseimbangannya.</p>
+<p>Analisis eksploratif mengungkapkan beberapa pola penting dalam data, termasuk korelasi kuat (0.53) antara pendidikan suami dan istri yang mengindikasikan <em>assortative mating</em>, serta pengaruh negatif dari jumlah anak balita terhadap partisipasi kerja (korelasi -0.21). Statistik deskriptif menunjukkan bahwa 33.64% wanita yang bekerja memiliki pendidikan tinggi, dibandingkan dengan hanya 20.92% pada wanita yang tidak bekerja. Normalized difference yang tinggi pada pendidikan suami (1.413) dan pendapatan keluarga (0.591) menegaskan pentingnya metode matching untuk mengontrol ketidakseimbangan dalam variabel <em>confounding</em> ini.</p>
+<p>Konsistensi estimasi efek treatment dari berbagai metode matching, dengan interval kepercayaan yang tidak mencakup nol, memberikan bukti kuat bahwa <strong>pendidikan tinggi memiliki dampak kausal positif terhadap partisipasi kerja wanita</strong>. Peningkatan estimasi dari raw difference (15.4 percentage points) menjadi ATE yang lebih tinggi setelah matching (23.6-28.2 percentage points) mengindikasikan bahwa efek kausal pendidikan mungkin sebenarnya lebih besar setelah mengontrol <em>confounding</em>.</p>
+<p>Meskipun hasil menunjukkan efek kausal yang robust, beberapa limitasi perlu diperhatikan. Pertama, data berasal dari tahun 1975, sehingga efek yang diestimasi mungkin berbeda dalam konteks sosial-ekonomi kontemporer. Kedua, metode matching tidak dapat mengontrol <em>confounding</em> yang tidak terobservasi, seperti kemampuan bawaan atau preferensi karir. Ketiga, trimming dalam propensity score matching, walaupun meningkatkan balance, mengurangi generalizability hasil. Namun, konsistensi estimasi berbagai spesifikasi dan metode memberikan kepercayaan pada validitas internal temuan, menyediakan <em>evidence base</em> yang kuat untuk kebijakan pendidikan dan ketenagakerjaan.</p>
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Guna Ulang</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/deed.id">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Kutipan</h2><div><div class="quarto-appendix-secondary-label">Kutipan BibTeX:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{sakti_megariansyah2024,
@@ -4835,8 +4928,24 @@ Treatment Effect Estimates: Matching
   title = {Partisipasi Tenaga Kerja Wanita di Amerika Serikat},
   date = {2024-11-21},
   langid = {id},
-  abstract = {The characteristic theme of the works of Stone is the
-    bridge between culture and society. ...}
+  abstract = {Studi ini menganalisis hubungan kausal antara pendidikan
+    tinggi wanita dan partisipasi mereka dalam tenaga kerja menggunakan
+    data Mroz dari Panel Study of Income Dynamics (PSID) tahun 1975.
+    Dengan menggunakan data observasional dari 753 wanita menikah
+    berusia 30-60 tahun, analisis ini menerapkan metode matching untuk
+    mengestimasi efek kausal dari pendidikan tinggi terhadap
+    probabilitas partisipasi dalam tenaga kerja, sambil mengontrol
+    berbagai faktor confounding seperti usia, pendidikan suami, jumlah
+    anak, dan pendapatan keluarga. Hasil analisis menggunakan berbagai
+    metode matching menunjukkan efek kausal yang positif dan signifikan.
+    \_Distance matching\_ dengan \_one-to-one specification\_
+    menghasilkan \_Average Treatment Effect\_ (ATE) sebesar 25
+    \_percentage points\_ (p = 0.001), sementara \_propensity score
+    matching\_ setelah \_trimming\_ mengestimasi efek sebesar 28.2
+    \_percentage points\_ (p \textless{} 0.001). Konsistensi hasil dari
+    berbagai spesifikasi matching memberikan bukti kuat bahwa pendidikan
+    tinggi secara substansial meningkatkan probabilitas partisipasi
+    wanita dalam tenaga kerja.}
 }
 </code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">Untuk atribusi, mohon kutip karya ini sebagai:</div><div id="ref-sakti_megariansyah2024" class="csl-entry quarto-appendix-citeas" role="listitem">
 Sakti Megariansyah, Taruma. 2024. <span>“Partisipasi Tenaga Kerja Wanita
