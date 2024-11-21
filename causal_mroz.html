@@ -3289,8 +3289,15 @@ window.Quarto = {
   </ul></li>
   <li><a href="#pemodelan-causal-inference" id="toc-pemodelan-causal-inference" class="nav-link" data-scroll-target="#pemodelan-causal-inference"><span class="header-section-number">6</span> Pemodelan <em>Causal Inference</em></a>
   <ul>
-  <li><a href="#persiapan-data" id="toc-persiapan-data" class="nav-link" data-scroll-target="#persiapan-data"><span class="header-section-number">6.1</span> Persiapan Data</a></li>
-  <li><a href="#distance-matching" id="toc-distance-matching" class="nav-link" data-scroll-target="#distance-matching"><span class="header-section-number">6.2</span> <em>Distance Matching</em></a></li>
+  <li><a href="#persiapan-data" id="toc-persiapan-data" class="nav-link" data-scroll-target="#persiapan-data"><span class="header-section-number">6.1</span> Persiapan Data</a>
+  <ul class="collapse">
+  <li><a href="#interpretasi-raw-diff-dan-nor-diff" id="toc-interpretasi-raw-diff-dan-nor-diff" class="nav-link" data-scroll-target="#interpretasi-raw-diff-dan-nor-diff"><span class="header-section-number">6.1.1</span> Interpretasi <em>Raw-diff</em> dan <em>Nor-diff</em></a></li>
+  <li><a href="#insight-dari-summary-statistics" id="toc-insight-dari-summary-statistics" class="nav-link" data-scroll-target="#insight-dari-summary-statistics"><span class="header-section-number">6.1.2</span> Insight dari Summary Statistics</a></li>
+  </ul></li>
+  <li><a href="#distance-matching" id="toc-distance-matching" class="nav-link" data-scroll-target="#distance-matching"><span class="header-section-number">6.2</span> <em>Distance Matching</em></a>
+  <ul class="collapse">
+  <li><a href="#implementasi-distance-matching" id="toc-implementasi-distance-matching" class="nav-link" data-scroll-target="#implementasi-distance-matching"><span class="header-section-number">6.2.1</span> Implementasi <em>Distance Matching</em></a></li>
+  </ul></li>
   <li><a href="#propensity-score-matching" id="toc-propensity-score-matching" class="nav-link" data-scroll-target="#propensity-score-matching"><span class="header-section-number">6.3</span> <em>Propensity Score Matching</em></a></li>
   </ul></li>
   <li><a href="#kesimpulan" id="toc-kesimpulan" class="nav-link" data-scroll-target="#kesimpulan"><span class="header-section-number">7</span> Kesimpulan</a>
@@ -3378,7 +3385,7 @@ Catatan
 <p>Versi python yang digunakan adalah versi <code>3.11</code>. Pastikan membaca <code>README.md</code> untuk menjalankan notebook ini.</p>
 </div>
 </div></div><p>Pada bagian ini akan dilakukan pengaturan untuk lembar kerja dan mengambil dataset <code>Mroz</code> dari paket <code>causaldata</code>.</p>
-<div id="cell-2" class="cell">
+<div id="cell-2" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># SETUP</span></span>
@@ -3423,20 +3430,20 @@ Output informasi dari data <code>Mroz</code>
 <section id="data-mroz" class="level2 page-columns page-full" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="data-mroz"><span class="header-section-number">2</span> Data <strong>Mroz</strong></h2>
 <p>Berdasarkan penjelasan singkat yang diperoleh dari <code>causaldata.Mroz</code>, Data <strong>Mroz</strong> merupakan sebuah dataset <em>cross-sectional</em> dari tahun 1975 yang berisi informasi tentang partisipasi tenaga kerja wanita di Amerika Serikat. Data ini dikumpulkan oleh Thomas A. Mroz sebagai bagian dari Panel Study of Income Dynamics (PSID).</p>
-<div class="cell" data-execution_count="77">
+<div class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean up column names and show a sample of the data</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df_mroz <span class="op">=</span> data_mroz.set_index(data_mroz.columns[<span class="dv">0</span>]).rename_axis(<span class="st">&#39;no&#39;</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>df_mroz.sample(<span class="dv">5</span>)</span></code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div id="tbl-sample" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="77">
+<div id="tbl-sample" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="3">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sample-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Tabel 1: Sampel dataset Mroz
 </figcaption>
 <div aria-describedby="tbl-sample-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display" data-execution_count="77">
+<div class="cell-output cell-output-display" data-execution_count="3">
 <div>
 
 
@@ -3467,59 +3474,59 @@ Tabel 1: Sampel dataset Mroz
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">600</td>
+<td data-quarto-table-cell-role="th">159</td>
+<td>True</td>
+<td>0</td>
+<td>1</td>
+<td>46</td>
+<td>True</td>
+<td>True</td>
+<td>1.443311</td>
+<td>10.000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">461</td>
 <td>False</td>
 <td>0</td>
 <td>3</td>
-<td>39</td>
+<td>38</td>
 <td>False</td>
 <td>False</td>
-<td>0.448189</td>
-<td>21.500</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">700</td>
-<td>False</td>
-<td>0</td>
-<td>0</td>
-<td>54</td>
-<td>False</td>
-<td>False</td>
-<td>1.120166</td>
-<td>35.000</td>
+<td>0.536588</td>
+<td>7.574</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">555</td>
-<td>False</td>
+<td data-quarto-table-cell-role="th">77</td>
+<td>True</td>
 <td>0</td>
 <td>2</td>
-<td>52</td>
+<td>32</td>
 <td>False</td>
-<td>True</td>
-<td>1.067042</td>
-<td>17.080</td>
+<td>False</td>
+<td>-1.029619</td>
+<td>18.100</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">567</td>
+<td data-quarto-table-cell-role="th">621</td>
 <td>False</td>
-<td>0</td>
 <td>1</td>
-<td>56</td>
+<td>4</td>
+<td>46</td>
 <td>False</td>
 <td>False</td>
-<td>0.850115</td>
-<td>16.073</td>
+<td>0.790593</td>
+<td>30.650</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">25</td>
-<td>True</td>
+<td data-quarto-table-cell-role="th">547</td>
+<td>False</td>
 <td>1</td>
-<td>1</td>
+<td>2</td>
 <td>31</td>
 <td>False</td>
 <td>False</td>
-<td>0.767548</td>
-<td>8.275</td>
+<td>0.573446</td>
+<td>10.190</td>
 </tr>
 </tbody>
 </table>
@@ -3531,7 +3538,7 @@ Tabel 1: Sampel dataset Mroz
 </div>
 </div>
 
-<div class="no-row-height column-margin column-container"><div id="cell-6" class="cell" data-execution_count="78">
+<div class="no-row-height column-margin column-container"><div id="cell-6" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Information about the dataset</span></span>
@@ -3615,7 +3622,7 @@ memory usage: 37.5 KB</code></pre>
 <section id="diagram-kausal-dag" class="level3" data-number="4.3">
 <h3 data-number="4.3" class="anchored" data-anchor-id="diagram-kausal-dag"><span class="header-section-number">4.3</span> Diagram Kausal (DAG)</h3>
 <p>Untuk menyederhanakan diagram atau model, dipertimbangan untuk mengabaikan variabel <code>lwg</code> dalam penyelesaian Causal Inference dalam lembar kerja ini. Berikut representasi visual dari hubungan kausal yang telah dibahas sebelumnya di atas:</p>
-<div id="cell-fig-dag-mroz" class="cell" data-execution_count="79">
+<div id="cell-fig-dag-mroz" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Definisikan variabel</span></span>
@@ -3632,11 +3639,11 @@ memory usage: 37.5 KB</code></pre>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot DAG</span></span>
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>dag.draw()</span></code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="79">
+<div class="cell-output cell-output-display" data-execution_count="5">
 <div id="fig-dag-mroz" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-scap="DAG Mroz" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-dag-mroz-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<a href="causal_mroz_files/figure-html/fig-dag-mroz-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Gambar 1: Diagram Kausal Partisipasi Seorang Wanita dalam Tenaga Kerja"><img role="img" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIKICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPgo8IS0tIEdlbmVyYXRlZCBieSBncmFwaHZpeiB2ZXJzaW9uIDEyLjIuMCAoMjAyNDExMDMuMTkzMSkKIC0tPgo8IS0tIFBhZ2VzOiAxIC0tPgo8c3ZnIHdpZHRoPSIzNDdwdCIgaGVpZ2h0PSIxODhwdCIKIHZpZXdCb3g9IjAuMDAgMC4wMCAzNDcuMDAgMTg4LjAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj4KPGcgaWQ9ImdyYXBoMCIgY2xhc3M9ImdyYXBoIiB0cmFuc2Zvcm09InNjYWxlKDEgMSkgcm90YXRlKDApIHRyYW5zbGF0ZSg0IDE4NCkiPgo8cG9seWdvbiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSJub25lIiBwb2ludHM9Ii00LDQgLTQsLTE4NCAzNDMsLTE4NCAzNDMsNCAtNCw0Ii8+CjwhLS0gaGMgLS0+CjxnIGlkPSJub2RlMSIgY2xhc3M9Im5vZGUiPgo8dGl0bGU+aGM8L3RpdGxlPgo8ZWxsaXBzZSBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBjeD0iMjciIGN5PSItMTYyIiByeD0iMjciIHJ5PSIxOCIvPgo8dGV4dCB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSIyNyIgeT0iLTE1Ni45NSIgZm9udC1mYW1pbHk9IlRpbWVzIE5ldyBSb21hbixzZXJpZiIgZm9udC1zaXplPSIxNC4wMCI+aGM8L3RleHQ+CjwvZz4KPCEtLSBsZnAgLS0+CjxnIGlkPSJub2RlMyIgY2xhc3M9Im5vZGUiPgo8dGl0bGU+bGZwPC90aXRsZT4KPGVsbGlwc2UgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgY3g9IjEzNiIgY3k9Ii0xOCIgcng9IjI3IiByeT0iMTgiLz4KPHRleHQgdGV4dC1hbmNob3I9Im1pZGRsZSIgeD0iMTM2IiB5PSItMTIuOTUiIGZvbnQtZmFtaWx5PSJUaW1lcyBOZXcgUm9tYW4sc2VyaWYiIGZvbnQtc2l6ZT0iMTQuMDAiPmxmcDwvdGV4dD4KPC9nPgo8IS0tIGhjJiM0NTsmZ3Q7bGZwIC0tPgo8ZyBpZD0iZWRnZTgiIGNsYXNzPSJlZGdlIj4KPHRpdGxlPmhjJiM0NTsmZ3Q7bGZwPC90aXRsZT4KPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgZD0iTTE5LjUyLC0xNDQuNDVDMTIuMTMsLTEyNS4zOSAzLjgzLC05My45IDE4LC03MiAzNS42MSwtNDQuNzggNzAuODksLTMxLjQgOTguMzEsLTI0LjkyIi8+Cjxwb2x5Z29uIGZpbGw9ImJsYWNrIiBzdHJva2U9ImJsYWNrIiBwb2ludHM9Ijk4Ljk3LC0yOC4zNSAxMDguMDIsLTIyLjg1IDk3LjUxLC0yMS41MSA5OC45NywtMjguMzUiLz4KPC9nPgo8IS0tIGluYyAtLT4KPGcgaWQ9Im5vZGU4IiBjbGFzcz0ibm9kZSI+Cjx0aXRsZT5pbmM8L3RpdGxlPgo8ZWxsaXBzZSBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBjeD0iNTQiIGN5PSItOTAiIHJ4PSIyNyIgcnk9IjE4Ii8+Cjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjU0IiB5PSItODQuOTUiIGZvbnQtZmFtaWx5PSJUaW1lcyBOZXcgUm9tYW4sc2VyaWYiIGZvbnQtc2l6ZT0iMTQuMDAiPmluYzwvdGV4dD4KPC9nPgo8IS0tIGhjJiM0NTsmZ3Q7aW5jIC0tPgo8ZyBpZD0iZWRnZTkiIGNsYXNzPSJlZGdlIj4KPHRpdGxlPmhjJiM0NTsmZ3Q7aW5jPC90aXRsZT4KPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgZD0iTTMzLjU0LC0xNDQuMDVDMzYuNTIsLTEzNi4zMiA0MC4xMywtMTI2Ljk2IDQzLjQ4LC0xMTguMjciLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iNDYuNjUsLTExOS43OSA0Ni45OCwtMTA5LjIgNDAuMTIsLTExNy4yNyA0Ni42NSwtMTE5Ljc5Ii8+CjwvZz4KPCEtLSBhZ2UgLS0+CjxnIGlkPSJub2RlMiIgY2xhc3M9Im5vZGUiPgo8dGl0bGU+YWdlPC90aXRsZT4KPGVsbGlwc2UgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgY3g9IjIwMSIgY3k9Ii0xNjIiIHJ4PSIyNyIgcnk9IjE4Ii8+Cjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjIwMSIgeT0iLTE1Ni45NSIgZm9udC1mYW1pbHk9IlRpbWVzIE5ldyBSb21hbixzZXJpZiIgZm9udC1zaXplPSIxNC4wMCI+YWdlPC90ZXh0Pgo8L2c+CjwhLS0gYWdlJiM0NTsmZ3Q7bGZwIC0tPgo8ZyBpZD0iZWRnZTQiIGNsYXNzPSJlZGdlIj4KPHRpdGxlPmFnZSYjNDU7Jmd0O2xmcDwvdGl0bGU+CjxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGQ9Ik0xNzguNjEsLTE1MS42OUMxNjEuMjgsLTE0My4xNCAxMzguNTMsLTEyOC42NSAxMjgsLTEwOCAxMTguMzYsLTg5LjA5IDEyMS4zMSwtNjQuOTcgMTI2LjE1LC00Ni42MSIvPgo8cG9seWdvbiBmaWxsPSJibGFjayIgc3Ryb2tlPSJibGFjayIgcG9pbnRzPSIxMjkuNDUsLTQ3Ljc5IDEyOC45NiwtMzcuMjEgMTIyLjc0LC00NS43OSAxMjkuNDUsLTQ3Ljc5Ii8+CjwvZz4KPCEtLSB3YyAtLT4KPGcgaWQ9Im5vZGU0IiBjbGFzcz0ibm9kZSI+Cjx0aXRsZT53YzwvdGl0bGU+CjxlbGxpcHNlIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGN4PSIxNjQiIGN5PSItOTAiIHJ4PSIyNyIgcnk9IjE4Ii8+Cjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjE2NCIgeT0iLTg0Ljk1IiBmb250LWZhbWlseT0iVGltZXMgTmV3IFJvbWFuLHNlcmlmIiBmb250LXNpemU9IjE0LjAwIj53YzwvdGV4dD4KPC9nPgo8IS0tIGFnZSYjNDU7Jmd0O3djIC0tPgo8ZyBpZD0iZWRnZTMiIGNsYXNzPSJlZGdlIj4KPHRpdGxlPmFnZSYjNDU7Jmd0O3djPC90aXRsZT4KPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgZD0iTTE5Mi40MiwtMTQ0Ljc2QzE4OC4wOCwtMTM2LjU1IDE4Mi43LC0xMjYuMzcgMTc3Ljc5LC0xMTcuMDkiLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMTgxLjAxLC0xMTUuNjkgMTczLjI0LC0xMDguNDkgMTc0LjgyLC0xMTguOTYgMTgxLjAxLC0xMTUuNjkiLz4KPC9nPgo8IS0tIGs2MTggLS0+CjxnIGlkPSJub2RlNSIgY2xhc3M9Im5vZGUiPgo8dGl0bGU+azYxODwvdGl0bGU+CjxlbGxpcHNlIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGN4PSIyMzgiIGN5PSItOTAiIHJ4PSIyOS4zNCIgcnk9IjE4Ii8+Cjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjIzOCIgeT0iLTg0Ljk1IiBmb250LWZhbWlseT0iVGltZXMgTmV3IFJvbWFuLHNlcmlmIiBmb250LXNpemU9IjE0LjAwIj5rNjE4PC90ZXh0Pgo8L2c+CjwhLS0gYWdlJiM0NTsmZ3Q7azYxOCAtLT4KPGcgaWQ9ImVkZ2U2IiBjbGFzcz0iZWRnZSI+Cjx0aXRsZT5hZ2UmIzQ1OyZndDtrNjE4PC90aXRsZT4KPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgZD0iTTIwOS41OCwtMTQ0Ljc2QzIxMy44MiwtMTM2Ljc1IDIxOS4wNCwtMTI2Ljg4IDIyMy44NCwtMTE3Ljc5Ii8+Cjxwb2x5Z29uIGZpbGw9ImJsYWNrIiBzdHJva2U9ImJsYWNrIiBwb2ludHM9IjIyNi45MiwtMTE5LjQ1IDIyOC41LC0xMDguOTcgMjIwLjczLC0xMTYuMTggMjI2LjkyLC0xMTkuNDUiLz4KPC9nPgo8IS0tIGs1IC0tPgo8ZyBpZD0ibm9kZTciIGNsYXNzPSJub2RlIj4KPHRpdGxlPms1PC90aXRsZT4KPGVsbGlwc2UgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgY3g9IjMxMiIgY3k9Ii05MCIgcng9IjI3IiByeT0iMTgiLz4KPHRleHQgdGV4dC1hbmNob3I9Im1pZGRsZSIgeD0iMzEyIiB5PSItODQuOTUiIGZvbnQtZmFtaWx5PSJUaW1lcyBOZXcgUm9tYW4sc2VyaWYiIGZvbnQtc2l6ZT0iMTQuMDAiPms1PC90ZXh0Pgo8L2c+CjwhLS0gYWdlJiM0NTsmZ3Q7azUgLS0+CjxnIGlkPSJlZGdlNSIgY2xhc3M9ImVkZ2UiPgo8dGl0bGU+YWdlJiM0NTsmZ3Q7azU8L3RpdGxlPgo8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBkPSJNMjIwLjA4LC0xNDguOTdDMjM3LjQ3LC0xMzggMjYzLjQxLC0xMjEuNjQgMjgzLjMsLTEwOS4xIi8+Cjxwb2x5Z29uIGZpbGw9ImJsYWNrIiBzdHJva2U9ImJsYWNrIiBwb2ludHM9IjI4NC45MiwtMTEyLjIxIDI5MS41MiwtMTAzLjkyIDI4MS4xOSwtMTA2LjI5IDI4NC45MiwtMTEyLjIxIi8+CjwvZz4KPCEtLSB3YyYjNDU7Jmd0O2xmcCAtLT4KPGcgaWQ9ImVkZ2U3IiBjbGFzcz0iZWRnZSI+Cjx0aXRsZT53YyYjNDU7Jmd0O2xmcDwvdGl0bGU+CjxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGQ9Ik0xNTcuMzYsLTcyLjQxQzE1NC4yMywtNjQuNTcgMTUwLjQsLTU0Ljk5IDE0Ni44NSwtNDYuMTMiLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMTUwLjExLC00NC44NiAxNDMuMTUsLTM2Ljg4IDE0My42MSwtNDcuNDYgMTUwLjExLC00NC44NiIvPgo8L2c+CjwhLS0gazYxOCYjNDU7Jmd0O2xmcCAtLT4KPGcgaWQ9ImVkZ2UyIiBjbGFzcz0iZWRnZSI+Cjx0aXRsZT5rNjE4JiM0NTsmZ3Q7bGZwPC90aXRsZT4KPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgZD0iTTIxOC44MSwtNzUuODNDMjAzLjIzLC02NS4xNCAxODEuMDYsLTQ5LjkyIDE2My41NywtMzcuOTIiLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMTY1Ljg5LC0zNS4yNyAxNTUuNjYsLTMyLjQ5IDE2MS45MiwtNDEuMDQgMTY1Ljg5LC0zNS4yNyIvPgo8L2c+CjwhLS0gbHdnIC0tPgo8ZyBpZD0ibm9kZTYiIGNsYXNzPSJub2RlIj4KPHRpdGxlPmx3ZzwvdGl0bGU+CjxlbGxpcHNlIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGN4PSIyNzMiIGN5PSItMTYyIiByeD0iMjciIHJ5PSIxOCIvPgo8dGV4dCB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSIyNzMiIHk9Ii0xNTYuOTUiIGZvbnQtZmFtaWx5PSJUaW1lcyBOZXcgUm9tYW4sc2VyaWYiIGZvbnQtc2l6ZT0iMTQuMDAiPmx3ZzwvdGV4dD4KPC9nPgo8IS0tIGs1JiM0NTsmZ3Q7bGZwIC0tPgo8ZyBpZD0iZWRnZTEiIGNsYXNzPSJlZGdlIj4KPHRpdGxlPms1JiM0NTsmZ3Q7bGZwPC90aXRsZT4KPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgZD0iTTI5MC44MSwtNzguNjVDMjg1Ljk3LC03Ni4zOSAyODAuODQsLTc0LjA1IDI3NiwtNzIgMjQwLjMxLC01Ni44NSAxOTguNjcsLTQxLjM1IDE3MC4xNCwtMzEuMDYiLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMTcxLjUzLC0yNy44NSAxNjAuOTMsLTI3Ljc3IDE2OS4xNywtMzQuNDQgMTcxLjUzLC0yNy44NSIvPgo8L2c+CjwhLS0gaW5jJiM0NTsmZ3Q7bGZwIC0tPgo8ZyBpZD0iZWRnZTEwIiBjbGFzcz0iZWRnZSI+Cjx0aXRsZT5pbmMmIzQ1OyZndDtsZnA8L3RpdGxlPgo8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBkPSJNNzAuMiwtNzUuMTdDODEuODgsLTY1LjIgOTcuODYsLTUxLjU2IDExMS4xNSwtNDAuMjEiLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMTEzLjM1LC00Mi45NCAxMTguNjgsLTMzLjc4IDEwOC44LC0zNy42MSAxMTMuMzUsLTQyLjk0Ii8+CjwvZz4KPC9nPgo8L3N2Zz4K" class="img-fluid quarto-figure quarto-figure-center figure-img" data-fig-scap="DAG Mroz"></a>
+<a href="causal_mroz_files/figure-html/fig-dag-mroz-output-1.svg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Gambar 1: Diagram Kausal Partisipasi Seorang Wanita dalam Tenaga Kerja"><img role="img" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIKICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPgo8IS0tIEdlbmVyYXRlZCBieSBncmFwaHZpeiB2ZXJzaW9uIDEyLjIuMCAoMjAyNDExMDMuMTkzMSkKIC0tPgo8IS0tIFBhZ2VzOiAxIC0tPgo8c3ZnIHdpZHRoPSIzNDdwdCIgaGVpZ2h0PSIxODhwdCIKIHZpZXdCb3g9IjAuMDAgMC4wMCAzNDcuMDAgMTg4LjAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj4KPGcgaWQ9ImdyYXBoMCIgY2xhc3M9ImdyYXBoIiB0cmFuc2Zvcm09InNjYWxlKDEgMSkgcm90YXRlKDApIHRyYW5zbGF0ZSg0IDE4NCkiPgo8cG9seWdvbiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSJub25lIiBwb2ludHM9Ii00LDQgLTQsLTE4NCAzNDMsLTE4NCAzNDMsNCAtNCw0Ii8+CjwhLS0gbHdnIC0tPgo8ZyBpZD0ibm9kZTEiIGNsYXNzPSJub2RlIj4KPHRpdGxlPmx3ZzwvdGl0bGU+CjxlbGxpcHNlIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGN4PSI1NCIgY3k9Ii0xNjIiIHJ4PSIyNyIgcnk9IjE4Ii8+Cjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjU0IiB5PSItMTU2Ljk1IiBmb250LWZhbWlseT0iVGltZXMgTmV3IFJvbWFuLHNlcmlmIiBmb250LXNpemU9IjE0LjAwIj5sd2c8L3RleHQ+CjwvZz4KPCEtLSBpbmMgLS0+CjxnIGlkPSJub2RlMiIgY2xhc3M9Im5vZGUiPgo8dGl0bGU+aW5jPC90aXRsZT4KPGVsbGlwc2UgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgY3g9IjI4NSIgY3k9Ii05MCIgcng9IjI3IiByeT0iMTgiLz4KPHRleHQgdGV4dC1hbmNob3I9Im1pZGRsZSIgeD0iMjg1IiB5PSItODQuOTUiIGZvbnQtZmFtaWx5PSJUaW1lcyBOZXcgUm9tYW4sc2VyaWYiIGZvbnQtc2l6ZT0iMTQuMDAiPmluYzwvdGV4dD4KPC9nPgo8IS0tIGxmcCAtLT4KPGcgaWQ9Im5vZGU3IiBjbGFzcz0ibm9kZSI+Cjx0aXRsZT5sZnA8L3RpdGxlPgo8ZWxsaXBzZSBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBjeD0iMTgyIiBjeT0iLTE4IiByeD0iMjciIHJ5PSIxOCIvPgo8dGV4dCB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSIxODIiIHk9Ii0xMi45NSIgZm9udC1mYW1pbHk9IlRpbWVzIE5ldyBSb21hbixzZXJpZiIgZm9udC1zaXplPSIxNC4wMCI+bGZwPC90ZXh0Pgo8L2c+CjwhLS0gaW5jJiM0NTsmZ3Q7bGZwIC0tPgo8ZyBpZD0iZWRnZTEwIiBjbGFzcz0iZWRnZSI+Cjx0aXRsZT5pbmMmIzQ1OyZndDtsZnA8L3RpdGxlPgo8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBkPSJNMjY2LjU5LC03Ni40OUMyNTAuNzcsLTY1LjczIDIyNy43MywtNTAuMDggMjA5LjY5LC0zNy44MiIvPgo8cG9seWdvbiBmaWxsPSJibGFjayIgc3Ryb2tlPSJibGFjayIgcG9pbnRzPSIyMTEuNzQsLTM0Ljk4IDIwMS41MSwtMzIuMjYgMjA3LjgxLC00MC43NyAyMTEuNzQsLTM0Ljk4Ii8+CjwvZz4KPCEtLSBrNSAtLT4KPGcgaWQ9Im5vZGUzIiBjbGFzcz0ibm9kZSI+Cjx0aXRsZT5rNTwvdGl0bGU+CjxlbGxpcHNlIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGN4PSIyNyIgY3k9Ii05MCIgcng9IjI3IiByeT0iMTgiLz4KPHRleHQgdGV4dC1hbmNob3I9Im1pZGRsZSIgeD0iMjciIHk9Ii04NC45NSIgZm9udC1mYW1pbHk9IlRpbWVzIE5ldyBSb21hbixzZXJpZiIgZm9udC1zaXplPSIxNC4wMCI+azU8L3RleHQ+CjwvZz4KPCEtLSBrNSYjNDU7Jmd0O2xmcCAtLT4KPGcgaWQ9ImVkZ2UxIiBjbGFzcz0iZWRnZSI+Cjx0aXRsZT5rNSYjNDU7Jmd0O2xmcDwvdGl0bGU+CjxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGQ9Ik00OC42NywtNzguNjdDNTMuMzgsLTc2LjQ1IDU4LjM1LC03NC4xMyA2MywtNzIgOTIuMjQsLTU4LjU5IDEyNS43MSwtNDMuNzIgMTQ5LjcsLTMzLjE1Ii8+Cjxwb2x5Z29uIGZpbGw9ImJsYWNrIiBzdHJva2U9ImJsYWNrIiBwb2ludHM9IjE1MC44NywtMzYuNDYgMTU4LjYyLC0yOS4yMyAxNDguMDUsLTMwLjA2IDE1MC44NywtMzYuNDYiLz4KPC9nPgo8IS0tIHdjIC0tPgo8ZyBpZD0ibm9kZTQiIGNsYXNzPSJub2RlIj4KPHRpdGxlPndjPC90aXRsZT4KPGVsbGlwc2UgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgY3g9Ijk5IiBjeT0iLTkwIiByeD0iMjciIHJ5PSIxOCIvPgo8dGV4dCB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSI5OSIgeT0iLTg0Ljk1IiBmb250LWZhbWlseT0iVGltZXMgTmV3IFJvbWFuLHNlcmlmIiBmb250LXNpemU9IjE0LjAwIj53YzwvdGV4dD4KPC9nPgo8IS0tIHdjJiM0NTsmZ3Q7bGZwIC0tPgo8ZyBpZD0iZWRnZTciIGNsYXNzPSJlZGdlIj4KPHRpdGxlPndjJiM0NTsmZ3Q7bGZwPC90aXRsZT4KPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgZD0iTTExNS40LC03NS4xN0MxMjcuMjIsLTY1LjIgMTQzLjQsLTUxLjU2IDE1Ni44NSwtNDAuMjEiLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMTU5LjA5LC00Mi45IDE2NC40OCwtMzMuNzggMTU0LjU4LC0zNy41NSAxNTkuMDksLTQyLjkiLz4KPC9nPgo8IS0tIGFnZSAtLT4KPGcgaWQ9Im5vZGU1IiBjbGFzcz0ibm9kZSI+Cjx0aXRsZT5hZ2U8L3RpdGxlPgo8ZWxsaXBzZSBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBjeD0iMTI2IiBjeT0iLTE2MiIgcng9IjI3IiByeT0iMTgiLz4KPHRleHQgdGV4dC1hbmNob3I9Im1pZGRsZSIgeD0iMTI2IiB5PSItMTU2Ljk1IiBmb250LWZhbWlseT0iVGltZXMgTmV3IFJvbWFuLHNlcmlmIiBmb250LXNpemU9IjE0LjAwIj5hZ2U8L3RleHQ+CjwvZz4KPCEtLSBhZ2UmIzQ1OyZndDtrNSAtLT4KPGcgaWQ9ImVkZ2U1IiBjbGFzcz0iZWRnZSI+Cjx0aXRsZT5hZ2UmIzQ1OyZndDtrNTwvdGl0bGU+CjxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGQ9Ik0xMDcuODQsLTE0OC4xNkM5Mi43NywtMTM3LjUgNzEuMTEsLTEyMi4xOSA1NC4wMSwtMTEwLjEiLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iNTYuNDYsLTEwNy41NSA0Ni4yOCwtMTA0LjYzIDUyLjQyLC0xMTMuMjYgNTYuNDYsLTEwNy41NSIvPgo8L2c+CjwhLS0gYWdlJiM0NTsmZ3Q7d2MgLS0+CjxnIGlkPSJlZGdlMyIgY2xhc3M9ImVkZ2UiPgo8dGl0bGU+YWdlJiM0NTsmZ3Q7d2M8L3RpdGxlPgo8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBkPSJNMTE5LjQ2LC0xNDQuMDVDMTE2LjQ4LC0xMzYuMzIgMTEyLjg3LC0xMjYuOTYgMTA5LjUyLC0xMTguMjciLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMTEyLjg4LC0xMTcuMjcgMTA2LjAyLC0xMDkuMiAxMDYuMzUsLTExOS43OSAxMTIuODgsLTExNy4yNyIvPgo8L2c+CjwhLS0gYWdlJiM0NTsmZ3Q7bGZwIC0tPgo8ZyBpZD0iZWRnZTQiIGNsYXNzPSJlZGdlIj4KPHRpdGxlPmFnZSYjNDU7Jmd0O2xmcDwvdGl0bGU+CjxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGQ9Ik0xMzIuNjQsLTE0NC4xNUMxNDIuMTYsLTEyMC4wMyAxNTkuNzcsLTc1LjM2IDE3MS4xOCwtNDYuNDMiLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMTc0LjQsLTQ3LjgyIDE3NC44MSwtMzcuMjMgMTY3Ljg4LC00NS4yNSAxNzQuNCwtNDcuODIiLz4KPC9nPgo8IS0tIGs2MTggLS0+CjxnIGlkPSJub2RlOCIgY2xhc3M9Im5vZGUiPgo8dGl0bGU+azYxODwvdGl0bGU+CjxlbGxpcHNlIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGN4PSIyMTEiIGN5PSItOTAiIHJ4PSIyOS4zNCIgcnk9IjE4Ii8+Cjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjIxMSIgeT0iLTg0Ljk1IiBmb250LWZhbWlseT0iVGltZXMgTmV3IFJvbWFuLHNlcmlmIiBmb250LXNpemU9IjE0LjAwIj5rNjE4PC90ZXh0Pgo8L2c+CjwhLS0gYWdlJiM0NTsmZ3Q7azYxOCAtLT4KPGcgaWQ9ImVkZ2U2IiBjbGFzcz0iZWRnZSI+Cjx0aXRsZT5hZ2UmIzQ1OyZndDtrNjE4PC90aXRsZT4KPHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgZD0iTTE0Mi4zOSwtMTQ3LjVDMTU0LjU4LC0xMzcuNDcgMTcxLjQ0LC0xMjMuNTggMTg1LjQsLTExMi4wOCIvPgo8cG9seWdvbiBmaWxsPSJibGFjayIgc3Ryb2tlPSJibGFjayIgcG9pbnRzPSIxODcuNDIsLTExNC45NiAxOTIuOTEsLTEwNS45IDE4Mi45NywtMTA5LjU1IDE4Ny40MiwtMTE0Ljk2Ii8+CjwvZz4KPCEtLSBoYyAtLT4KPGcgaWQ9Im5vZGU2IiBjbGFzcz0ibm9kZSI+Cjx0aXRsZT5oYzwvdGl0bGU+CjxlbGxpcHNlIGZpbGw9Im5vbmUiIHN0cm9rZT0iYmxhY2siIGN4PSIzMTIiIGN5PSItMTYyIiByeD0iMjciIHJ5PSIxOCIvPgo8dGV4dCB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSIzMTIiIHk9Ii0xNTYuOTUiIGZvbnQtZmFtaWx5PSJUaW1lcyBOZXcgUm9tYW4sc2VyaWYiIGZvbnQtc2l6ZT0iMTQuMDAiPmhjPC90ZXh0Pgo8L2c+CjwhLS0gaGMmIzQ1OyZndDtpbmMgLS0+CjxnIGlkPSJlZGdlOSIgY2xhc3M9ImVkZ2UiPgo8dGl0bGU+aGMmIzQ1OyZndDtpbmM8L3RpdGxlPgo8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBkPSJNMzA1LjQ2LC0xNDQuMDVDMzAyLjQ4LC0xMzYuMzIgMjk4Ljg3LC0xMjYuOTYgMjk1LjUyLC0xMTguMjciLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMjk4Ljg4LC0xMTcuMjcgMjkyLjAyLC0xMDkuMiAyOTIuMzUsLTExOS43OSAyOTguODgsLTExNy4yNyIvPgo8L2c+CjwhLS0gaGMmIzQ1OyZndDtsZnAgLS0+CjxnIGlkPSJlZGdlOCIgY2xhc3M9ImVkZ2UiPgo8dGl0bGU+aGMmIzQ1OyZndDtsZnA8L3RpdGxlPgo8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBkPSJNMzE5LjcxLC0xNDQuM0MzMjcuMywtMTI1LjEgMzM1LjgsLTkzLjQ5IDMyMSwtNzIgMjk4LjUyLC0zOS4zNyAyNTMuMDcsLTI2LjgyIDIyMC4yNSwtMjEuOTkiLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMjIxLjA5LC0xOC41NyAyMTAuNzIsLTIwLjc4IDIyMC4yLC0yNS41MiAyMjEuMDksLTE4LjU3Ii8+CjwvZz4KPCEtLSBrNjE4JiM0NTsmZ3Q7bGZwIC0tPgo8ZyBpZD0iZWRnZTIiIGNsYXNzPSJlZGdlIj4KPHRpdGxlPms2MTgmIzQ1OyZndDtsZnA8L3RpdGxlPgo8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBkPSJNMjAzLjk4LC03Mi4wNUMyMDAuNzcsLTY0LjMyIDE5Ni45LC01NC45NiAxOTMuMywtNDYuMjciLz4KPHBvbHlnb24gZmlsbD0iYmxhY2siIHN0cm9rZT0iYmxhY2siIHBvaW50cz0iMTk2LjYsLTQ1LjA5IDE4OS41MywtMzcuMTkgMTkwLjEzLC00Ny43NyAxOTYuNiwtNDUuMDkiLz4KPC9nPgo8L2c+Cjwvc3ZnPgo=" class="img-fluid quarto-figure quarto-figure-center figure-img" data-fig-scap="DAG Mroz"></a>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dag-mroz-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Gambar 1: Diagram Kausal Partisipasi Seorang Wanita dalam Tenaga Kerja
@@ -3658,7 +3665,7 @@ Gambar 1: Diagram Kausal Partisipasi Seorang Wanita dalam Tenaga Kerja
 <h4 data-number="5.1.1" class="anchored" data-anchor-id="data-numerikal"><span class="header-section-number">5.1.1</span> Data Numerikal</h4>
 <p>Untuk memahami karakteristik numerik dalam dataset, langkah selanjutnya adalah menganalisis statistik deskriptif variabel-variabel numerik. Analisis ini akan memberikan gambaran tentang distribusi, ukuran pemusatan, dan penyebaran data.</p>
 
-<div class="no-row-height column-margin column-container"><div id="cell-16" class="cell" data-execution_count="80">
+<div class="no-row-height column-margin column-container"><div id="cell-16" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Information about the dataset</span></span>
@@ -3681,18 +3688,18 @@ Data columns (total 8 columns):
 dtypes: bool(3), float64(2), int64(3)
 memory usage: 37.5 KB</code></pre>
 </div>
-</div></div><div class="cell" data-execution_count="81">
+</div></div><div class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>df_mroz.describe()</span></code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div id="tbl-describe" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="81">
+<div id="tbl-describe" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="7">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-describe-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Tabel 2: Deskripsi Statistik Mroz
 </figcaption>
 <div aria-describedby="tbl-describe-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display" data-execution_count="81">
+<div class="cell-output cell-output-display" data-execution_count="7">
 <div>
 
 
@@ -4352,7 +4359,7 @@ text-align: right;
 <section id="pairplot" class="level4 page-columns page-full" data-number="5.2.1">
 <h4 data-number="5.2.1" class="anchored" data-anchor-id="pairplot"><span class="header-section-number">5.2.1</span> Pairplot</h4>
 <p>Visualisasi menggunakan pairplot merupakan langkah awal yang efisien dalam eksplorasi data Mroz karena mampu menampilkan distribusi setiap variabel dan hubungan antar variabel secara simultan dalam satu tampilan. Dengan pembedaan warna berdasarkan partisipasi tenaga kerja (<code>lfp</code>), pairplot membantu mengidentifikasi pola, outlier, dan potensi hubungan yang relevan untuk analisis kausal selanjutnya.</p>
-<div id="cell-fig-pairplot" class="cell page-columns page-full">
+<div id="cell-fig-pairplot" class="cell page-columns page-full" data-execution_count="10">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>sns.pairplot(df_mroz[[<span class="st">&#39;wc&#39;</span>, <span class="st">&#39;hc&#39;</span>, <span class="st">&#39;lfp&#39;</span>, <span class="st">&#39;age&#39;</span>, <span class="st">&#39;k5&#39;</span>, <span class="st">&#39;k618&#39;</span>, <span class="st">&#39;inc&#39;</span>]], hue<span class="op">=</span><span class="st">&#39;lfp&#39;</span>)<span class="op">;</span></span></code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -4409,7 +4416,7 @@ Gambar 2: Pairplot Mroz
 <section id="histogram" class="level4" data-number="5.2.2">
 <h4 data-number="5.2.2" class="anchored" data-anchor-id="histogram"><span class="header-section-number">5.2.2</span> Histogram</h4>
 <p>Untuk memahami karakteristik sampel dan pola hubungan antar variabel, berikut disajikan histogram yang menggambarkan distribusi usia, jumlah anak, dan pendapatan keluarga, di mana setiap variabel dikelompokkan berdasarkan status partisipasi kerja wanita.</p>
-<div class="cell" data-layout="[[1,1],[1]]" data-align="center">
+<div class="cell" data-layout="[[1,1],[1]]" data-align="center" data-execution_count="11">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>sns.histplot(</span>
@@ -4512,7 +4519,7 @@ Gambar 3: Visualisasi Histogram terhadap berbagai variabel
 <section id="correlation-matrix" class="level4" data-number="5.2.3">
 <h4 data-number="5.2.3" class="anchored" data-anchor-id="correlation-matrix"><span class="header-section-number">5.2.3</span> Correlation Matrix</h4>
 <p>Untuk melengkapi analisis sebelumnya, correlation matrix digunakan untuk memvisualisasikan dan mengukur kekuatan hubungan linear antar variabel dalam data Mroz. Meskipun korelasi tidak mengimplikasikan kausalitas, pola yang terungkap dapat membantu memvalidasi struktur kausal yang telah dihipotesiskan dalam DAG.</p>
-<div id="cell-fig-corr" class="cell" data-execution_count="87">
+<div id="cell-fig-corr" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Kode</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>corr <span class="op">=</span> df_mroz.corr()</span>
@@ -4591,13 +4598,226 @@ Kenapa Distance Matching?
 <p>Dipilihnya metode Matching karena dalam workshop ini, pembahasan topik matching yang dibahas hanya Distance Matching dan Propernsity Score Matching. Dalam workshop telah disampaikan bahwa banyak metode Matching yang dapat digunakan, namun dalam workshop ini yang dibahas dan yang diperagakan hanya dua metode tersebut.</p>
 </div>
 </div>
-</div></div><section id="persiapan-data" class="level3" data-number="6.1">
+</div></div><section id="persiapan-data" class="level3 page-columns page-full" data-number="6.1">
 <h3 data-number="6.1" class="anchored" data-anchor-id="persiapan-data"><span class="header-section-number">6.1</span> Persiapan Data</h3>
-<p>Berdasarkan eksplorasi data sebelumnya dan diagram kausal (DAG) yang telah dibuat (<a href="#fig-dag-mroz" class="quarto-xref">Gambar 1</a>), persiapan data untuk pemodelan kausal akan berfokus pada tiga komponen utama: variabel treatment (<code>wc</code>), variabel outcome (<code>lfp</code>), dan variabel <em>confounding</em> yang telah diidentifikasi. Variabel <em>confounding</em> yang akan digunakan mencakup usia (<code>age</code>), pendidikan suami (<code>hc</code>), jumlah anak balita (<code>k5</code>), jumlah anak usia sekolah (<code>k618</code>), pendapatan keluarga (<code>inc</code>). Pemilihan variabel ini konsisten dengan struktur DAG yang menunjukkan jalur-jalur yang mempengaruhi baik <em>treatment</em> (X) maupun <em>outcome</em> (Y).</p>
-<p>Untuk implementasi dengan package <code>causalinference</code> menggunakan kelas <code>CausalModel</code>, data perlu diorganisir dalam format yang sesuai. Variabel treatment (<code>wc</code>) dan outcome (<code>lfp</code>) berbentuk biner (0/1), sedangkan variabel confounding akan dijadikan sebagai covariate matrix X. Perlu diperhatikan bahwa beberapa variabel numerik seperti <code>inc</code> menunjukkan distribusi yang skewed berdasarkan analisis sebelumnya, namun pada langkah awal ini tidak akan dilakukan transformasi data. Variabel-variabel ini akan digunakan dalam pemodelan untuk mengestimasi <em>Average Treatment Effect</em> (ATE) dan <em>Average Treatment Effect on the Treated</em> (ATT).</p>
+<p>Berdasarkan eksplorasi data sebelumnya dan diagram kausal (DAG) yang telah dibuat (<a href="#fig-dag-mroz" class="quarto-xref">Gambar 1</a>), persiapan data untuk pemodelan kausal akan berfokus pada tiga komponen utama: variabel treatment (<code>wc</code>), variabel outcome (<code>lfp</code>), dan variabel <em>confounding</em> yang telah diidentifikasi. Variabel <em>confounding</em> yang akan digunakan mencakup usia (<code>age</code>), pendidikan suami (<code>hc</code>), jumlah anak balita (<code>k5</code>), jumlah anak usia sekolah (<code>k618</code>), pendapatan keluarga (<code>inc</code>). Pemilihan variabel ini konsisten dengan struktur DAG yang menunjukkan jalur-jalur yang mempengaruhi baik <em>treatment</em> (<code>D</code>) maupun <em>outcome</em> (<code>Y</code>).</p>
+<div class="cell" data-execution_count="13">
+<details class="code-fold">
+<summary>Kode</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>int_columns <span class="op">=</span> [<span class="st">&#39;lfp&#39;</span>, <span class="st">&#39;wc&#39;</span>, <span class="st">&#39;hc&#39;</span>]</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>df_mroz[int_columns] <span class="op">=</span> df_mroz[int_columns].astype(<span class="bu">int</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>confounding_column <span class="op">=</span> [<span class="st">&#39;k5&#39;</span>, <span class="st">&#39;k618&#39;</span>, <span class="st">&#39;age&#39;</span>, <span class="st">&#39;hc&#39;</span>, <span class="st">&#39;inc&#39;</span>]</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>pd.DataFrame({</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;Variable&#39;</span>: <span class="st">&#39;X0 X1 X2 X3 X4&#39;</span>.split(),</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;Confounding&#39;</span>: confounding_column</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-confounding" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="13">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-confounding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Tabel 5: Tabel Variabel Confounding
+</figcaption>
+<div aria-describedby="tbl-confounding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-display" data-execution_count="13">
+<div>
+
+
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Variable</th>
+<th data-quarto-table-cell-role="th">Confounding</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>X0</td>
+<td>k5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>X1</td>
+<td>k618</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>X2</td>
+<td>age</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>X3</td>
+<td>hc</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>X4</td>
+<td>inc</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>Untuk implementasi dengan package <code>causalinference</code> menggunakan kelas <code>CausalModel</code>, data perlu diorganisir dalam format yang sesuai. Variabel treatment (<code>wc</code>) dan outcome (<code>lfp</code>) berbentuk biner (0/1), sedangkan variabel confounding akan dijadikan sebagai matrix <code>X</code>. Perlu diperhatikan bahwa beberapa variabel numerik seperti <code>inc</code> menunjukkan distribusi yang skewed berdasarkan analisis sebelumnya, namun pada langkah awal ini tidak akan dilakukan transformasi data. Variabel-variabel ini akan digunakan dalam pemodelan untuk mengestimasi <em>Average Treatment Effect</em> (ATE) dan <em>Average Treatment Effect on the Treated</em> (ATT).</p>
+<div id="cell-39" class="cell" data-execution_count="14">
+<details class="code-fold">
+<summary>Kode</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>Y_outcome_var <span class="op">=</span> df_mroz[<span class="st">&#39;lfp&#39;</span>].to_numpy()</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>D_treatment_var <span class="op">=</span> df_mroz[<span class="st">&#39;wc&#39;</span>].to_numpy()</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>X_confounding_vars <span class="op">=</span> df_mroz[confounding_column].to_numpy()</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>mroz_causal_model <span class="op">=</span> CausalModel(Y_outcome_var, D_treatment_var, X_confounding_vars)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(mroz_causal_model.summary_stats)</span></code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Summary Statistics
+
+                       Controls (N_c=541)         Treated (N_t=212)             
+       Variable         Mean         S.d.         Mean         S.d.     Raw-diff
+--------------------------------------------------------------------------------
+              Y        0.525        0.500        0.679        0.468        0.154
+
+                       Controls (N_c=541)         Treated (N_t=212)             
+       Variable         Mean         S.d.         Mean         S.d.     Nor-diff
+--------------------------------------------------------------------------------
+             X0        0.201        0.453        0.330        0.663        0.226
+             X1        1.396        1.363        1.245        1.199       -0.117
+             X2       42.860        7.993       41.717        8.234       -0.141
+             X3        0.229        0.421        0.807        0.396        1.413
+             X4       18.109        9.825       25.283       14.080        0.591
+</code></pre>
+</div>
+</div>
+<p>Berikut hal yang dapat diinterpretasikan berdasarkan hasil <code>mroz_causal_model.summary_stats</code> diatas:</p>
+<section id="interpretasi-raw-diff-dan-nor-diff" class="level4 page-columns page-full" data-number="6.1.1">
+<h4 data-number="6.1.1" class="anchored" data-anchor-id="interpretasi-raw-diff-dan-nor-diff"><span class="header-section-number">6.1.1</span> Interpretasi <em>Raw-diff</em> dan <em>Nor-diff</em></h4>
+<ol type="1">
+<li><strong>Raw-diff (<em>Raw difference</em>):</strong>
+<ul>
+<li>Raw-diff = 0.154 pada variabel Y (<code>lfp</code>) menunjukkan perbedaan kasar dalam proporsi partisipasi kerja antara kelompok treatment dan control.</li>
+<li>Artinya, tingkat partisipasi kerja pada wanita yang kuliah (67.9%) lebih tinggi 15.4 <em>percentage points</em> dibandingkan wanita yang tidak kuliah (52.5%).</li>
+<li>Namun, perbedaan ini belum mengontrol pengaruh variabel <em>confounding</em>.</li>
+</ul></li>
+</ol>
+
+<div class="no-row-height column-margin column-container"><div class="callout callout-style-default callout-note callout-titled" title="Mean sebagai Persentase?">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Mean sebagai Persentase?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Untuk variabel biner (0/1) seperti <code>lfp</code>, <em>mean</em> dapat diinterpretasikan sebagai proporsi (Contoh: Mean Y untuk <em>treated</em> sebesar 0.679, sama saja dengan 67.9% wanita yang kuliah berpartisipasi dalam tenaga kerja).</p>
+</div>
+</div></div><ol start="2" type="1">
+<li><strong>Nor-diff (<em>Normalized difference</em>):</strong>
+<ul>
+<li>Nor-diff mengukur ketidakseimbangan antara kelompok treatment dan control untuk setiap variabel confounding (X0-X4).</li>
+<li>Nilai yang lebih besar mengindikasikan ketidakseimbangan yang lebih tinggi.</li>
+<li>Rule of thumb: nilai absolut &gt;0.25 menunjukkan ketidakseimbangan yang perlu diperhatikan.</li>
+</ul></li>
+</ol>
+</section>
+<section id="insight-dari-summary-statistics" class="level4" data-number="6.1.2">
+<h4 data-number="6.1.2" class="anchored" data-anchor-id="insight-dari-summary-statistics"><span class="header-section-number">6.1.2</span> Insight dari Summary Statistics</h4>
+<p>Referensi variabel X dengan <em>confounding</em> dapat dilihat pada (<a href="#tbl-confounding" class="quarto-xref">Tabel 5</a>).</p>
+<ol type="1">
+<li><strong>Ketidakseimbangan Signifikan:</strong>
+<ul>
+<li>X3 (<code>hc</code>) menunjukkan Nor-diff tertinggi (1.413), mengindikasikan ketidakseimbangan besar dalam pendidikan suami.</li>
+<li>Serupa pada <a href="#tbl-crosstab-6" class="quarto-xref">Tabel 4 (f)</a>, 80.7% suami dari wanita yang kuliah juga kuliah, dibanding hanya 22.9% pada kelompok control.</li>
+<li>Ini memperkuat temuan sebelumnya tentang <em>assortative mating</em> sebagaimana disebutkan pada bagian <a href="#tabel-kontingensi-cross-tabulation">cross-tabulation</a>.</li>
+</ul></li>
+<li><strong>Perbedaan Pendapatan:</strong>
+<ul>
+<li>X4 (<code>inc</code>) menunjukkan <em>Nor-diff</em> 0.591, mengindikasikan perbedaan pendapatan yang substansial.</li>
+<li>Rata-rata pendapatan keluarga lebih tinggi pada kelompok treatment (25.283 vs 18.109).</li>
+</ul></li>
+<li><strong>Variabel yang Relatif Seimbang:</strong>
+<ul>
+<li>X1 (<code>k618</code>) dan X2 (<code>age</code>) menunjukkan <em>Nor-diff</em> yang relatif kecil (-0.117 dan -0.141)</li>
+<li>Ini mengindikasikan distribusi usia dan jumlah anak 6-17 tahun cukup seimbang antara kedua kelompok</li>
+</ul></li>
+<li><strong>Implikasi untuk Matching:</strong>
+<ul>
+<li>Ketidakseimbangan yang besar pada beberapa variabel (terutama <code>hc</code> dan <code>inc</code>) menegaskan pentingnya metode <em>matching</em>.</li>
+<li><em>Matching</em> akan berusaha menyeimbangkan karakteristik ini untuk mendapatkan estimasi efek kausal yang lebih akurat</li>
+</ul></li>
+</ol>
+<p>Temuan ini memperkuat keputusan untuk menggunakan metode matching dalam mengestimasi efek kausal pendidikan wanita terhadap partisipasi kerja.</p>
+</section>
 </section>
 <section id="distance-matching" class="level3" data-number="6.2">
 <h3 data-number="6.2" class="anchored" data-anchor-id="distance-matching"><span class="header-section-number">6.2</span> <em>Distance Matching</em></h3>
+<p>Setelah melakukan eksplorasi data, ditemukan beberapa pola penting dalam dataset Mroz. Hasil dari <a href="#insight-dari-summary-statistics"><em>summary statistics</em></a> terlihat ketidakseimbangan yang signifikan pada beberapa variabel confounding, terutama pendidikan suami (<code>hc</code>) dengan <em>normalized difference</em> sebesar 1.413 dan pendapatan keluarga (<code>inc</code>) dengan normalized difference 0.591. Ketidakseimbangan ini mengindikasikan perlunya metode yang dapat menyeimbangkan karakteristik antara kelompok <em>treatment</em> dan <em>control</em>.</p>
+<p><em>Distance matching</em> merupakan teknik yang bertujuan untuk mengatasi ketidakseimbangan tersebut dengan cara memasangkan setiap unit <em>treatment</em> dengan satu atau lebih unit <em>control</em> yang memiliki karakteristik serupa berdasarkan jarak. Dengan membandingkan <em>outcome</em> antara pasangan-pasangan yang memiliki karakteristik serupa ini, diharapkan dapat diperoleh estimasi efek kausal yang lebih akurat dengan mengurangi bias yang muncul akibat ketidakseimbangan dalam variabel <em>confounding</em>.</p>
+<section id="implementasi-distance-matching" class="level4" data-number="6.2.1">
+<h4 data-number="6.2.1" class="anchored" data-anchor-id="implementasi-distance-matching"><span class="header-section-number">6.2.1</span> Implementasi <em>Distance Matching</em></h4>
+<p>Dalam implementasi distance matching, dilakukan dua spesifikasi yang berbeda untuk menguji robustness hasil estimasi.</p>
+<ul>
+<li><p>Spesifikasi pertama menggunakan <em>one-to-one matching</em> (matches=1), di mana setiap unit treatment dipasangkan dengan tepat satu unit <em>control</em> yang paling mirip karakteristiknya. Pilihan ini merupakan pendekatan yang konservatif dan umum digunakan karena meminimalkan potensi bias dengan hanya memilih pasangan terbaik.</p></li>
+<li><p>Spesifikasi kedua menggunakan matches=2 (<em>one-to-two matching</em>), yang memungkinkan setiap unit <em>treatment</em> dipasangkan dengan dua unit <em>control</em> terdekat. Penggunaan dua matches berdasarkan rasio <em>control-to-treatment</em> sekitar 2.5:1 (71.85% control vs 28.15% treatment) dari (<a href="#tbl-prop-2" class="quarto-xref">Tabel 3 (b)</a>), sehingga masih tersedia cukup unit control yang berkualitas untuk matching.</p></li>
+</ul>
+<p>Membandingkan hasil dari kedua spesifikasi ini dapat memberikan insight tentang stabilitas estimasi efek kausal dan membantu menilai sensitivitas hasil terhadap pilihan jumlah matches.</p>
+<section id="hasil-one-to-one-matching" class="level5" data-number="6.2.1.1">
+<h5 data-number="6.2.1.1" class="anchored" data-anchor-id="hasil-one-to-one-matching"><span class="header-section-number">6.2.1.1</span> Hasil <em>One-to-One Matching</em></h5>
+<div id="cell-44" class="cell">
+<details class="code-fold">
+<summary>Kode</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>mroz_causal_model.reset()</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>mroz_causal_model.est_via_matching(matches<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(mroz_causal_model.estimates)</span></code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Treatment Effect Estimates: Matching
+
+                     Est.       S.e.          z      P&gt;|z|      [95% Conf. int.]
+--------------------------------------------------------------------------------
+           ATE      0.250      0.078      3.193      0.001      0.096      0.403
+           ATC      0.272      0.094      2.902      0.004      0.088      0.455
+           ATT      0.193      0.081      2.379      0.017      0.034      0.353
+</code></pre>
+</div>
+</div>
+<p>Berdasarkan hasil distance matching dengan one-to-one matching, berikut insight yang bisa saya identifikasi:</p>
+<p><em>Average Treatment Effect</em> (ATE) sebesar 0.250 (p-value = 0.001) mengindikasikan bahwa secara rata-rata, pendidikan tinggi meningkatkan probabilitas partisipasi kerja wanita sebesar 25 percentage points. Estimasi ini signifikan secara statistik pada level 1% dan interval kepercayaan 95% [0.096, 0.403] tidak mencakup nol, memberikan <strong><em>bukti kuat bahwa pendidikan tinggi memiliki efek kausal positif terhadap partisipasi kerja</em></strong>. Besaran efek ini substansial mengingat dari bagian persiapan data sebelumnya, <em>raw difference</em> dalam partisipasi kerja antara wanita yang kuliah dan tidak adalah sekitar 15.4 percentage points. Peningkatan estimasi setelah matching mengindikasikan bahwa efek kausal pendidikan mungkin sebenarnya lebih besar setelah mengontrol <em>confounding</em>.</p>
+</section>
+<section id="hasil-one-to-two-matching" class="level5" data-number="6.2.1.2">
+<h5 data-number="6.2.1.2" class="anchored" data-anchor-id="hasil-one-to-two-matching"><span class="header-section-number">6.2.1.2</span> Hasil <em>One-to-Two Matching</em></h5>
+<div id="cell-47" class="cell" data-execution_count="24">
+<details class="code-fold">
+<summary>Kode</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>mroz_causal_model.reset()</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>mroz_causal_model.est_via_matching(matches<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(mroz_causal_model.estimates)</span></code><button title="Salin ke Papan Klip" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Treatment Effect Estimates: Matching
+
+                     Est.       S.e.          z      P&gt;|z|      [95% Conf. int.]
+--------------------------------------------------------------------------------
+           ATE      0.236      0.066      3.582      0.000      0.107      0.366
+           ATC      0.259      0.078      3.304      0.001      0.105      0.412
+           ATT      0.179      0.066      2.698      0.007      0.049      0.309
+</code></pre>
+</div>
+</div>
+<p>Hasil <em>one-to-two matching</em> menunjukkan <em>Average Treatment Effect</em> (ATE) sebesar 0.236 (p-value &lt; 0.001), mengindikasikan <strong><em>bahwa pendidikan tinggi meningkatkan probabilitas partisipasi kerja wanita sebesar 23.6 percentage points</em></strong>. Estimasi ini tetap signifikan secara statistik dengan interval kepercayaan 95% [0.107, 0.366] yang tidak mencakup nol. Menariknya, estimasi ini sangat konsisten dengan hasil one-to-one matching sebelumnya (ATE = 0.250), namun dengan standard error yang lebih kecil (0.066 dibandingkan 0.078). Penurunan standard error ini menunjukkan bahwa penggunaan dua matches dapat meningkatkan presisi estimasi tanpa substansially mengubah besaran efeknya, memberikan tambahan kepercayaan pada robustness hasil analisis kausal kita.</p>
+</section>
+</section>
 </section>
 <section id="propensity-score-matching" class="level3" data-number="6.3">
 <h3 data-number="6.3" class="anchored" data-anchor-id="propensity-score-matching"><span class="header-section-number">6.3</span> <em>Propensity Score Matching</em></h3>
