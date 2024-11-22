@@ -8,7 +8,6 @@ dependencies = [
     "causaldata>=0.1.5",
     "causalgraphicalmodels>=0.0.4",
     "causalinference>=0.1.3",
-    "dowhy>=0.11.1",
     "numpy>=2.1.3",
     "pandas>=2.2.3",
     "seaborn>=0.13.2",
